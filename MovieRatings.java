@@ -3,8 +3,11 @@ import java.io.FileInputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import neustore.base.LRUBuffer;
 
 
 public class MovieRatings /* extends junit.framework.TestCase */ {
@@ -118,6 +121,28 @@ public class MovieRatings /* extends junit.framework.TestCase */ {
 			for(UserRating userRating: movieRatings._userRatings) {
 				System.out.println("\tUser: " + userRating.userId + " Rating: " + userRating.rating + " Date: " + userRating.date);
 			}
+		}
+		
+		// Write the movie ratings into an index
+		MovieID_Ratings.MovieID_Ratings index = null;
+		try{
+			index = new MovieID_Ratings.MovieID_Ratings(new LRUBuffer (5, 4096), "ratings.index", 1);
+			for(MovieRatings movieRatings: movieRatingsList) {
+				MovieID_Ratings.MovieRatings ratingsEntry = new MovieID_Ratings.MovieRatings(movieRatings._movieId);
+				for(UserRating rating: movieRatings._userRatings) {
+					ratingsEntry.UserRatings.add(new MovieID_Ratings.Rating(rating.userId, rating.rating, 0));
+				}
+				
+				// TODO: don't truncate the list once we have page spanning
+				ratingsEntry.UserRatings =  new Vector<MovieID_Ratings.Rating>(ratingsEntry.UserRatings.subList(0, 93));
+				index.insertEntry(ratingsEntry);
+			}
+			index.close();
+		} catch(Exception e) {
+			// TODO: handle exceptions in a less retarded way.
+			System.err.println("Insert F##Xed up");
+			e.printStackTrace();
+			System.exit(1);
 		}
 	}
 }
