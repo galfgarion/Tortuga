@@ -7,7 +7,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import MovieID_RatingsIndex.AttributeRecord;
-import MovieID_Ratings.MovieRatings;
+import MovieID_Ratings.*;
 
 
 /**
@@ -115,17 +115,11 @@ public class ByteArray {
 		System.arraycopy( b, 0, buf, offset, b.length);
 	}
 	
-	public void writeMovieRatings ( MovieRatings toWrite ) throws IOException
+	public void writeRating ( Rating toWrite ) throws IOException
 	{
-		/* writeInt (toWrite.nodeId);
-		writeInt (toWrite.elementId);
-		writeInt (toWrite.PreOrder);
-		writeInt (toWrite.PostOrder);
-		writeInt (toWrite.Ordinal);
-		writeInt (toWrite.Layer);
-		writeInt (toWrite.Parent);
-		writeInt (toWrite.isLeaf); */
-		writeInt (toWrite.MovieID);
+		writeInt (toWrite.UserID);
+		writeInt (toWrite.Rating);
+		writeInt (toWrite.DateOfRating);
 	}
 	
 	public void writeAttributeRecord(AttributeRecord record) throws IOException {
@@ -152,12 +146,11 @@ public class ByteArray {
 	 * @return the student record
 	 * @throws IOException
 	 */
-	public MovieRatings readMovieRatings () throws IOException {
-		int nodeId = readInt();
-		int elementId = readInt();
-		int PreOrder = readInt();
-		int PostOrder = readInt();
-		return new MovieRatings();
+	public Rating readMovieRating () throws IOException {
+		int UserID = readInt();
+		int Rating = readInt();
+		int DateOfRating = readInt();
+		return new Rating(UserID, Rating, DateOfRating);
 	}
 	
 	public AttributeRecord readAttributeRecord () throws IOException {

@@ -77,6 +77,8 @@ public abstract class DBBuffer {
 		file.seek(pageSize*pageID);
 		int len = file.read(page);
 		if ( len != pageSize ) {
+			// throw new RuntimeException();
+			System.err.println(len + " " + pageSize);
 			System.err.println("Attempted to load a page whose length was not page size--exiting");
 			System.exit(0);
 		}

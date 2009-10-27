@@ -103,9 +103,7 @@ public abstract class DBIndex {
 			
 			DBBufferReturnElement ret = buffer.readPage(file, 0);
 			byte[] headPage = (byte[]) ret.object;
-			ByteArray ba = new ByteArray(headPage, ByteArray.READ);				
-			ba.readInt(); // skip -1.
-			ba.readInt(); // skip pageSize
+			ByteArray ba = new ByteArray(headPage, ByteArray.READ);
 			numPages = ba.readInt();
 			firstEmpty = ba.readInt();
 			byte[] indexHead = new byte[pageSize-OVERHEAD];
@@ -205,6 +203,7 @@ public abstract class DBIndex {
 		out.writeInt(-1);
 		out.writeInt(pageSize);
 		out.writeInt(numPages);
+		System.out.println("numPages on write: " + numPages);
 		out.writeInt(firstEmpty);
 		out.write(indexHead);
 		
