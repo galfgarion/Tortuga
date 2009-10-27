@@ -76,15 +76,13 @@ public abstract class DBIndex {
 	 * @param isCreate    whether create (or open)
 	 * @throws IOException
 	 */
-	public DBIndex(DBBuffer buffer, String filename, boolean isCreate) throws IOException {
+	public DBIndex(DBBuffer buffer, String filename, int isCreate) throws IOException {
 		this.buffer = buffer;
 		pageSize = buffer.pageSize;
 		
-		if ( isCreate ) {
+		if ( isCreate == 1 ) {
 			File f = new File(filename);
-			if (f.exists()) {
-				System.out.println("File exists! Can not create new file!"); System.exit(0);
-			}
+			f.delete();
 			file = new RandomAccessFile (f, "rw");
 
 			numPages = 0;
@@ -94,20 +92,18 @@ public abstract class DBIndex {
 		else {
 			File f = new File(filename);
 			if (!f.exists()) {
-				System.out.println("File not exists!"); System.exit(0); 
+				System.err.println("File does not exist!"); System.exit(0); 
 			}
 			file = new RandomAccessFile(f, "rw");
 			if (file.readInt() != -1) {
-				System.out.println("Illegal file opened!"); System.exit(0);
+				System.err.println("Illegal file opened!"); System.exit(0);
 			}
 			pageSize = file.readInt();
 			file.seek(0);
-
+			
 			DBBufferReturnElement ret = buffer.readPage(file, 0);
 			byte[] headPage = (byte[]) ret.object;
-			ByteArray ba = new ByteArray(headPage, ByteArray.READ);				
-			ba.readInt(); // skip -1.
-			ba.readInt(); // skip pageSize
+			ByteArray ba = new ByteArray(headPage, ByteArray.READ);
 			numPages = ba.readInt();
 			firstEmpty = ba.readInt();
 			byte[] indexHead = new byte[pageSize-OVERHEAD];
@@ -136,7 +132,7 @@ public abstract class DBIndex {
 	/**
 	 * The length of the system information in bytes.
 	 */
-	protected static final int OVERHEAD = 16;
+	protected static int OVERHEAD = 16; // was 16
 	/**
 	 * The random access file.
 	 */
@@ -207,6 +203,7 @@ public abstract class DBIndex {
 		out.writeInt(-1);
 		out.writeInt(pageSize);
 		out.writeInt(numPages);
+		System.out.println("numPages on write: " + numPages);
 		out.writeInt(firstEmpty);
 		out.write(indexHead);
 		
@@ -218,7 +215,6 @@ public abstract class DBIndex {
 		buffer.flush(file);
 		
 		file.close();
-		file = null;
 	}
 	
 	/* *********************** *

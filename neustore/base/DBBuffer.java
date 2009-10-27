@@ -77,7 +77,9 @@ public abstract class DBBuffer {
 		file.seek(pageSize*pageID);
 		int len = file.read(page);
 		if ( len != pageSize ) {
-			System.out.println("Load a page whose length is not page size!");
+			// throw new RuntimeException();
+			System.err.println(len + " " + pageSize);
+			System.err.println("Attempted to load a page whose length was not page size--exiting");
 			System.exit(0);
 		}
 		diskReadIO++;
@@ -93,7 +95,7 @@ public abstract class DBBuffer {
 	 */
 	protected void save (RandomAccessFile file, byte[] page, int pageID) throws IOException {
 		if ( page.length != pageSize ) {
-			System.out.println( "Plans to save a page whose size is not pageSize!" );
+			System.err.println( "Attempted to save a page whose size is not pageSize--exiting" );
 			System.exit(0);
 		}
 		diskWriteIO++;
@@ -122,8 +124,8 @@ public abstract class DBBuffer {
 	 */
 	public DBBufferReturnElement readPage(RandomAccessFile file, int pageID) throws IOException {
 		bufferReadIO ++;
-		
 		DBBufferStoredElement stored = find(file, pageID);
+		
 		if ( stored == null ) {
 			byte[] page = new byte[pageSize];
 			load(file, page, pageID);

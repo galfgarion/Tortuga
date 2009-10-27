@@ -7,7 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class MovieRatings extends junit.framework.TestCase {
+public class MovieRatings /* extends junit.framework.TestCase */ {
 	
 	int _movieId;
 	ArrayList<UserRating> _userRatings;
@@ -66,7 +66,7 @@ public class MovieRatings extends junit.framework.TestCase {
 	}
 	
 	/* unit tests */
-	public void testPatternMatching() {
+	/* public void testPatternMatching() {
 		Matcher matcher = ratingPattern.matcher("1234,3,2009-04-12\n");
 		matcher.find();
 		assertEquals("1234", matcher.group(1));
@@ -77,7 +77,7 @@ public class MovieRatings extends junit.framework.TestCase {
 		Matcher matcher = idPattern.matcher("1234:\n");
 		matcher.find();
 		assertEquals("1234", matcher.group(1));
-	}
+	} */
 	
 	/**
 	 * This test just reads and writes a file
@@ -120,5 +120,4 @@ public class MovieRatings extends junit.framework.TestCase {
 			}
 		}
 	}
-
 }
