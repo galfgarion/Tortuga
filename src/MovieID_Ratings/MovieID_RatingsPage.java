@@ -17,7 +17,6 @@ public class MovieID_RatingsPage extends DBPage {
 	
 	public MovieID_RatingsPage( int _pageSize ) {
 		super(1, _pageSize);
-		// records = new Vector<StructureIndexRecord>();
 	}
 	
 	/**
@@ -26,38 +25,47 @@ public class MovieID_RatingsPage extends DBPage {
 	 */
 	public int numRecs() { return MovieAndRatings.UserRatings.size(); }
 	
-	public int insert(MovieRatings toInsert)
-	{ 
+	public int insert(MovieRatings toInsert, int NumRatingsToInsert) { 
+		if(MovieAndRatings != null) {
+			System.err.println("just making sure that you really meant to insert to a page that already has a MovieAndRatings object instantiated");
+			System.exit(1);
+		}
 		MovieAndRatings = toInsert;
+		/* MovieAndRatings = new MovieRatings(toInsert.MovieID);
+		for(int x = 0; x < NumRatingsToInsert; x++) {
+			
+		} */
 		return 1;
 	}
 	
 	/* returns StructureIndexRecord with NodeId == TargetNodeId if found
 	 * null otherwise
 	 */
-	public Vector<Ratings> getRatingsById (int TargetMovieID)
+	public Vector<Rating> getRatingsById (int TargetMovieID)
 	{
 		if(MovieAndRatings.MovieID == TargetMovieID)
-		{
 			return MovieAndRatings.UserRatings;
-		}
 		return null;
 	}
 	
 	protected void read( byte[] b ) throws IOException {
 		ByteArray ba = new ByteArray( b, ByteArray.READ );
+		int MovieID = ba.readInt();
 		int numRecs = ba.readInt();
-		ba.readString(46); // 92 bytes of padding
-		MovieAndRatings = ba.readMovieRatings();
+		
+		MovieAndRatings = new MovieRatings(MovieID);
+		for(int RecordNum = 0; RecordNum < numRecs; RecordNum++)
+			MovieAndRatings.UserRatings.add(ba.readMovieRating());
 	}
 	
 	protected void write( byte[] b ) throws IOException {
 		ByteArray ba = new ByteArray( b, ByteArray.WRITE );
-		int numRecs = 1; // records.size();
-		ba.writeInt( numRecs );
-		String padding = " ";
-		for(int padChars = 0; padChars < 46; padChars++)
-			ba.writeString( padding );
-		ba.writeMovieRatings(MovieAndRatings);
+		/* write MovieID and NumRecs */
+		ba.writeInt( MovieAndRatings.MovieID );
+		// System.out.println(MovieAndRatings.UserRatings.size());
+		ba.writeInt( MovieAndRatings.UserRatings.size() );
+		
+		for(Rating R : MovieAndRatings.UserRatings)
+			ba.writeRating(R);
 	}
 }
