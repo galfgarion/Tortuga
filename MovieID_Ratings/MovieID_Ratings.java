@@ -14,6 +14,9 @@ import neustore.base.*;
  * @modified Matthew Robertson <mlrobert@calpoly.edu>
  */
 
+/*
+ * This is a comment
+ */
 public class MovieID_Ratings extends DBIndex {
 	/**
 	 * maximum number of records in a page
