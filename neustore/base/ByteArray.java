@@ -115,11 +115,11 @@ public class ByteArray {
 		System.arraycopy( b, 0, buf, offset, b.length);
 	}
 	
-	public void writeRating ( Rating toWrite ) throws IOException
+	public void writeRating ( UserRating r ) throws IOException
 	{
-		writeInt (toWrite.UserID);
-		writeInt (toWrite.Rating);
-		writeInt (toWrite.DateOfRating);
+		writeInt (r.userId);
+		writeInt (r.rating);
+		writeInt (r.date);
 	}
 	
 	public void writeAttributeRecord(AttributeRecord record) throws IOException {
@@ -146,11 +146,11 @@ public class ByteArray {
 	 * @return the student record
 	 * @throws IOException
 	 */
-	public Rating readMovieRating () throws IOException {
+	public UserRating readMovieRating () throws IOException {
 		int UserID = readInt();
 		int Rating = readInt();
 		int DateOfRating = readInt();
-		return new Rating(UserID, Rating, DateOfRating);
+		return new UserRating(UserID, Rating, DateOfRating);
 	}
 	
 	public AttributeRecord readAttributeRecord () throws IOException {

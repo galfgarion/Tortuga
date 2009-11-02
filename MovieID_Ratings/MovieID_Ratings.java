@@ -97,12 +97,12 @@ public class MovieID_Ratings extends DBIndex {
 		return lastPageID;
 	}
 	
-	public Vector<Rating> getRatingsById (int TargetNodeId)
+	public Vector<UserRating> getRatingsById (int TargetNodeId)
 	{
 		try {
 			for ( int currentPageID=1; currentPageID<=lastPageID; currentPageID++ ) {
 				MovieID_RatingsPage currentPage = myReadPage(currentPageID);
-				Vector<Rating> returnRecord = currentPage.getRatingsById(TargetNodeId);
+				Vector<UserRating> returnRecord = currentPage.getRatingsById(TargetNodeId);
 				buffer.writePage(file, currentPageID, currentPage);
 				if(returnRecord != null)
 					return returnRecord;

@@ -23,7 +23,7 @@ public class MovieID_RatingsPage extends DBPage {
 	 * Returns the number of records in this page.
 	 * @return   the number of records 
 	 */
-	public int numRecs() { return MovieAndRatings.UserRatings.size(); }
+	public int numRecs() { return MovieAndRatings.size(); }
 	
 	public int insert(MovieRatings toInsert, int NumRatingsToInsert) { 
 		if(MovieAndRatings != null) {
@@ -41,10 +41,10 @@ public class MovieID_RatingsPage extends DBPage {
 	/* returns StructureIndexRecord with NodeId == TargetNodeId if found
 	 * null otherwise
 	 */
-	public Vector<Rating> getRatingsById (int TargetMovieID)
+	public Vector<UserRating> getRatingsById (int TargetMovieID)
 	{
-		if(MovieAndRatings.MovieID == TargetMovieID)
-			return MovieAndRatings.UserRatings;
+		if(MovieAndRatings.getMovieID() == TargetMovieID)
+			return MovieAndRatings.getUserRatings();
 		return null;
 	}
 	
@@ -55,17 +55,18 @@ public class MovieID_RatingsPage extends DBPage {
 		
 		MovieAndRatings = new MovieRatings(MovieID);
 		for(int RecordNum = 0; RecordNum < numRecs; RecordNum++)
-			MovieAndRatings.UserRatings.add(ba.readMovieRating());
+			MovieAndRatings.add(ba.readMovieRating());
 	}
 	
 	protected void write( byte[] b ) throws IOException {
 		ByteArray ba = new ByteArray( b, ByteArray.WRITE );
 		/* write MovieID and NumRecs */
-		ba.writeInt( MovieAndRatings.MovieID );
+		ba.writeInt( MovieAndRatings.getMovieID() );
 		// System.out.println(MovieAndRatings.UserRatings.size());
-		ba.writeInt( MovieAndRatings.UserRatings.size() );
+		ba.writeInt( MovieAndRatings.size() );
 		
-		for(Rating R : MovieAndRatings.UserRatings)
+		for(UserRating R : MovieAndRatings) {
 			ba.writeRating(R);
+		}
 	}
 }
