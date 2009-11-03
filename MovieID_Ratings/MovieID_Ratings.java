@@ -32,8 +32,8 @@ public class MovieID_Ratings extends DBIndex {
 	
 	public MovieID_Ratings(DBBuffer _buffer, String filename, int isCreate) throws IOException {
 		super(_buffer, filename, isCreate);
-		// pageCapacity = (pageSize-8); // header of 8 bytes, record of 1000000000 bytes
-		pageCapacity = 100; // very low and nonexact but good
+		pageCapacity = (pageSize-8) / 12; // header of 8 bytes, record of 12 bytes
+		// pageCapacity = 100; // very low and nonexact but good
 		if(isCreate == 1)
 			lastPage = new MovieID_RatingsPage(pageSize);
 		else
