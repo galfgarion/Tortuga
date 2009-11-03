@@ -6,17 +6,16 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import neustore.base.LRUBuffer;
 
 
-public class MovieRatings  extends junit.framework.TestCase implements Iterable<UserRating>{
+public class MovieRatings extends junit.framework.TestCase implements Iterable<UserRating>{
 	
 	private int _movieID;
-	private Vector<UserRating> _userRatings = new Vector<UserRating>();
+	private ArrayList<UserRating> _userRatings = new ArrayList<UserRating>();
 	static Pattern ratingPattern = Pattern.compile("(\\d+),(\\d),(\\d{4}-\\d{2}-\\d{2})");
 	static Pattern idPattern = Pattern.compile("^\\s*(\\d+):\\s*$");
 	
@@ -167,7 +166,7 @@ public class MovieRatings  extends junit.framework.TestCase implements Iterable<
 		_userRatings.add(rating);
 	}
 	
-	public Vector<UserRating> getUserRatings() {
+	public ArrayList<UserRating> getUserRatings() {
 		// TODO Auto-generated method stub
 		return _userRatings;
 	}

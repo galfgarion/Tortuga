@@ -1,7 +1,5 @@
 package MovieID_Ratings;
 
-import java.sql.Date;
-
 /**
  *  Should be immutable
  */

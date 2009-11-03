@@ -1,7 +1,7 @@
 package MovieID_Ratings;
 
 import java.io.IOException;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import neustore.base.DBPage;
 import neustore.base.ByteArray;
@@ -30,21 +30,25 @@ public class MovieID_RatingsPage extends DBPage {
 			System.err.println("just making sure that you really meant to insert to a page that already has a MovieAndRatings object instantiated");
 			System.exit(1);
 		}
-		MovieAndRatings = toInsert;
-		/* MovieAndRatings = new MovieRatings(toInsert.MovieID);
-		for(int x = 0; x < NumRatingsToInsert; x++) {
-			
-		} */
+		MovieAndRatings = new MovieRatings(toInsert.getMovieID());
+		ArrayList<UserRating> y = toInsert.getUserRatings();
+		if(y.size() < NumRatingsToInsert)
+			NumRatingsToInsert = y.size();
+		for(int RatingsAdded = 0; RatingsAdded < NumRatingsToInsert; RatingsAdded++) {
+			MovieAndRatings.add(y.remove(0));
+		}
 		return 1;
 	}
 	
 	/* returns StructureIndexRecord with NodeId == TargetNodeId if found
 	 * null otherwise
 	 */
-	public Vector<UserRating> getRatingsById (int TargetMovieID)
+	public ArrayList<UserRating> getRatingsById (int TargetMovieID)
 	{
-		if(MovieAndRatings.getMovieID() == TargetMovieID)
+		// System.out.println(MovieAndRatings.getMovieID());
+		if(MovieAndRatings.getMovieID() == TargetMovieID) {
 			return MovieAndRatings.getUserRatings();
+		}
 		return null;
 	}
 	
