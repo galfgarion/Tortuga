@@ -9,6 +9,8 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import database.RatingStore;
+
 import neustore.base.LRUBuffer;
 
 
@@ -106,7 +108,6 @@ public class MovieRatings extends junit.framework.TestCase implements Iterable<U
 	}
 	
 	public static void main(String[] args) {
-		ArrayList<MovieRatings> movieRatingsList = new ArrayList<MovieRatings>();
 		
 		if(args.length < 1) {
 			System.out.println("Usage: <command> <ratingsDir>");
@@ -117,36 +118,10 @@ public class MovieRatings extends junit.framework.TestCase implements Iterable<U
 			System.err.println("Can't open file: " + ratingsDir);
 			System.exit(1);
 		}
-		if(ratingsDir.isDirectory()) {
-			File[] movieFiles = ratingsDir.listFiles();
-			
-			for(File file: movieFiles) {
-				movieRatingsList.add(new MovieRatings(file));
-			}
-		}
 		
-		for(MovieRatings movieRatings: movieRatingsList) {
-			System.out.println("Movie Id: " + movieRatings.getMovieID());
-			for(UserRating userRating: movieRatings._userRatings) {
-				System.out.println("\tUser: " + userRating.userId + " Rating: " + userRating.rating + " Date: " + userRating.date);
-			}
-		}
+		RatingStore store = new RatingStore(ratingsDir);
+		store.createFromFile(ratingsDir);
 		
-		// Write the movie ratings into an index
-		MovieID_Ratings index = null;
-		try{
-			
-			index = new MovieID_Ratings(new LRUBuffer (5, 4096), "ratings.index", 1);
-			for(MovieRatings movieRatings: movieRatingsList) {
-				index.insertEntry(movieRatings);
-			}
-			index.close();
-		} catch(Exception e) {
-			// TODO: handle exceptions in a less retarded way.
-			System.err.println("Insert F##Xed up");
-			e.printStackTrace();
-			System.exit(1);
-		}
 	}
 	
 	public int getMovieID() {
