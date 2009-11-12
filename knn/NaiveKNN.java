@@ -87,7 +87,6 @@ public class NaiveKNN {
 				else { // there were no users who rated both movies
 					distanceTable.put(movieID, otherMovieID, Double.MAX_VALUE);
 				}
-				
 			}
 		}
 		

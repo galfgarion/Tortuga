@@ -120,9 +120,9 @@ public class ByteArray {
 		writeInt (r.userId);
 		
 		// is there a more efficient way to do this? should we store the rating as a byte[1] instead?
-		byte Rating[] = new byte[1];
-		Rating[0] = r.rating;
-		write(Rating);
+		/* byte Rating[] = new byte[1];
+		Rating[0] = r.rating; */
+		writeInt (r.rating);
 		
 		writeInt (r.date);
 	}
@@ -154,12 +154,13 @@ public class ByteArray {
 	public UserRating readMovieRating () throws IOException {
 		int UserID = readInt();
 		
-		byte Rating[] = new byte[1];
-		read(Rating);
+		/* byte Rating[] = new byte[1];
+		read(Rating); */
+		int Rating = readInt();
 		
 		int DateOfRating = readInt();
 		
-		return new UserRating(UserID, Rating[0], DateOfRating);
+		return new UserRating(UserID, Rating, DateOfRating);
 	}
 	
 	public AttributeRecord readAttributeRecord () throws IOException {
