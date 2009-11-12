@@ -118,7 +118,12 @@ public class ByteArray {
 	public void writeRating ( UserRating r ) throws IOException
 	{
 		writeInt (r.userId);
-		writeInt (r.rating);
+		
+		// is there a more efficient way to do this? should we store the rating as a byte[1] instead?
+		byte Rating[] = new byte[1];
+		Rating[0] = r.rating;
+		write(Rating);
+		
 		writeInt (r.date);
 	}
 	
@@ -148,9 +153,13 @@ public class ByteArray {
 	 */
 	public UserRating readMovieRating () throws IOException {
 		int UserID = readInt();
-		int Rating = readInt();
+		
+		byte Rating[] = new byte[1];
+		read(Rating);
+		
 		int DateOfRating = readInt();
-		return new UserRating(UserID, Rating, DateOfRating);
+		
+		return new UserRating(UserID, Rating[0], DateOfRating);
 	}
 	
 	public AttributeRecord readAttributeRecord () throws IOException {

@@ -49,13 +49,8 @@ public class MovieRatings extends junit.framework.TestCase implements Iterable<U
 				Matcher matcher = ratingPattern.matcher(line);
 				if(matcher.find()) {
 					int userId = Integer.parseInt(matcher.group(1));
-					int rating = Integer.parseInt(matcher.group(2));
+					byte rating = (byte)Integer.parseInt(matcher.group(2));
 					String date = matcher.group(3);
-					
-					// TODO: remove this HACK
-					if(_userRatings.size() >= 340){
-						break;
-					} // end TODO
 					
 					_userRatings.add(new UserRating(userId, rating, date));
 				} else {
