@@ -38,7 +38,6 @@ public class NaiveKNN {
 		
 		int movieID = 1; // TODO: use the total later for iterating/sorting
 		for(;; movieID++){
-			System.out.println("curMovie: " + movieID);
 			ArrayList<UserRating> ratings = testObject.getRatingsById(movieID);
 			if(ratings == null){
 				break;
@@ -57,8 +56,6 @@ public class NaiveKNN {
 				if(otherRatings == null) {
 					break;
 				}
-				
-				System.out.println("otherRatings.size(): " + otherRatings.size());
 				
 				HashMap<Integer, Integer> bRatings = new HashMap<Integer, Integer>();
 				

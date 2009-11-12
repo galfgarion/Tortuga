@@ -56,13 +56,6 @@ public class RatingStore {
 			movieRatingsList.add(new MovieRatings(ratingsDirectory));
 		}
 		
-		for(MovieRatings movieRatings: movieRatingsList) {
-			System.out.println("Movie Id: " + movieRatings.getMovieID());
-			for(UserRating userRating: movieRatings) {
-				System.out.println("\tUser: " + userRating.userId + " Rating: " + userRating.rating + " Date: " + userRating.date);
-			}
-		}
-		
 		// Write the movie ratings into an index
 		MovieID_Ratings index = null;
 		try{
