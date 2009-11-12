@@ -53,5 +53,24 @@ public class NaiveKNNTest extends junit.framework.TestCase {
 		for(int i=0; i < 5; i++)
 			System.out.println(neighbors.get(i));
 	}
-
+	
+	public void testFakeData() throws Exception {
+		File indexFile = new File("/tmp/test.index");
+		RatingStore database = new RatingStore(indexFile);
+		database.createFromFile(new File("fake_data"));
+		
+		NaiveKNN knn = new NaiveKNN(indexFile);
+		List<Neighbor> neighbors = knn.nearestNeighbors(2, 1);
+		
+		assertEquals(1.0, knn.distanceTable.get(1, 2));
+		assertEquals(1.0, knn.distanceTable.get(2, 1));
+		assertEquals(4.0, knn.distanceTable.get(1, 3));
+		assertEquals(1.0, knn.distanceTable.get(2, 3));
+	}
+	
+	public void testFullData() throws Exception {
+		File indexFile = new File("/tmp/test.index");
+		RatingStore database = new RatingStore(indexFile);
+		database.createFromFile(new File("training_set"));
+	}
 }

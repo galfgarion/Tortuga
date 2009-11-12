@@ -69,7 +69,7 @@ public class ByteArray {
 	 * @throws IOException
 	 */
 	public void read( byte[] b ) throws IOException {
-		in.read(b);
+		System.err.println("bytes read (should be 1): " + in.read(b));
 	}
 	
 	/**
@@ -115,8 +115,7 @@ public class ByteArray {
 		System.arraycopy( b, 0, buf, offset, b.length);
 	}
 	
-	public void writeRating ( UserRating r ) throws IOException
-	{
+	public void writeRating ( UserRating r ) throws IOException {
 		writeInt (r.userId);
 		
 		// is there a more efficient way to do this? should we store the rating as a byte[1] instead?

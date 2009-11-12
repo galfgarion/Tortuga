@@ -104,8 +104,8 @@ public class MovieID_Ratings extends DBIndex {
 			for ( int currentPageID=1; currentPageID<=lastPageID; currentPageID++ ) {
 				MovieID_RatingsPage currentPage = myReadPage(currentPageID);
 				ratingsToAdd = currentPage.getRatingsById(TargetNodeId);
-				if(ratingsToAdd != null)
-					System.err.println(ratingsToAdd);
+				/* if(ratingsToAdd != null)
+					System.err.println(ratingsToAdd); */
 				if(returnRecord.size() > 0 && ratingsToAdd == null)
 					return returnRecord;
 				else if(ratingsToAdd != null)
@@ -116,6 +116,9 @@ public class MovieID_Ratings extends DBIndex {
 			System.err.println("IOException in getRecordById: " + e.toString());
 			System.exit(1);
 		}
+		
+		if(returnRecord.size() > 0)
+			return returnRecord;
 		System.out.println("shouldn't get here unless the movie isn't in the db: " + returnRecord.size());
 		return null;
 	}

@@ -38,6 +38,7 @@ public class NaiveKNN {
 		
 		int movieID = 1; // TODO: use the total later for iterating/sorting
 		for(;; movieID++){
+			System.out.println("curMovie: " + movieID);
 			ArrayList<UserRating> ratings = testObject.getRatingsById(movieID);
 			if(ratings == null){
 				break;
@@ -70,7 +71,6 @@ public class NaiveKNN {
 				int ratingCounter = 0;
 				
 				for(Map.Entry<Integer, Integer> entry : aRatings.entrySet()){
-					System.out.println("entry.getKey(): " + entry.getKey());
 					if(bRatings.containsKey(entry.getKey()) ) {
 						int squareDiff = entry.getValue() - bRatings.get(entry.getKey());
 						squareDiff = squareDiff * squareDiff;
