@@ -2,6 +2,7 @@ package MovieID_Ratings;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -120,7 +121,11 @@ public class MovieRatings extends junit.framework.TestCase implements Iterable<U
 		}
 		
 		RatingStore store = new RatingStore(ratingsDir);
-		store.createFromFile(ratingsDir);
+		try {
+			store.createFromFile(ratingsDir);
+		} catch(FileNotFoundException e) {
+			System.out.println("file not found in unique identifier kfwekakerw!lel1shurf");
+		}
 		
 	}
 	

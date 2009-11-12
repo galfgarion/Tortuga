@@ -1,6 +1,7 @@
 package database;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import neustore.base.LRUBuffer;
@@ -10,7 +11,7 @@ import junit.framework.TestCase;
 
 public class RatingStoreTest extends TestCase {
 	
-	public void testCreateFromFiles() {
+	public void testCreateFromFiles() throws FileNotFoundException {
 		File testIndexName = new File("test.index");
 		File testDir = new File("data");
 		

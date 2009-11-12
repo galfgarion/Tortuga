@@ -1,6 +1,7 @@
 package knn;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.List;
 
 import database.RatingStore;
@@ -71,6 +72,6 @@ public class NaiveKNNTest extends junit.framework.TestCase {
 	public void testFullData() throws Exception {
 		File indexFile = new File("/tmp/test.index");
 		RatingStore database = new RatingStore(indexFile);
-		database.createFromFile(new File("training_set"));
+		database.createFromFile(new File("training_se"));
 	}
 }

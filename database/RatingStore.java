@@ -1,6 +1,7 @@
 package database;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 import neustore.base.LRUBuffer;
@@ -26,7 +27,7 @@ public class RatingStore {
 	 * 
 	 * @param ratingsFile
 	 */
-	public void createFromFile(File ratingsFile) {
+	public void createFromFile(File ratingsFile) throws FileNotFoundException {
 		loadFromFile(ratingsFile, true);
 	}
 	/**
@@ -35,16 +36,16 @@ public class RatingStore {
 	 * 
 	 * @param ratingsFile
 	 */
-	public void appendFromFile(File ratingsDirectory) {
+	public void appendFromFile(File ratingsDirectory) throws FileNotFoundException {
 		loadFromFile(ratingsDirectory, false);
 	}
 	
-	private void loadFromFile(File ratingsDirectory, boolean create) {
+	private void loadFromFile(File ratingsDirectory, boolean create) throws FileNotFoundException {
 		ArrayList<MovieRatings> movieRatingsList = new ArrayList<MovieRatings>();
 		
 		if(!ratingsDirectory.canRead()) {
 			System.err.println("Can't open file: " + ratingsDirectory);
-			System.exit(1);
+			throw new FileNotFoundException();
 		}
 		if(ratingsDirectory.isDirectory()) {
 			File[] movieFiles = ratingsDirectory.listFiles();
