@@ -1,8 +1,10 @@
 package knn;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.List;
+
+import neustore.base.LRUBuffer;
+import MovieID_Ratings.MovieID_Ratings;
 
 import database.RatingStore;
 
@@ -61,7 +63,7 @@ public class NaiveKNNTest extends junit.framework.TestCase {
 		database.createFromFile(new File("fake_data"));
 		
 		NaiveKNN knn = new NaiveKNN(indexFile);
-		List<Neighbor> neighbors = knn.nearestNeighbors(2, 1);
+		knn.nearestNeighbors(2, 1);
 		
 		assertEquals(1.0, knn.distanceTable.get(1, 2));
 		assertEquals(1.0, knn.distanceTable.get(2, 1));
@@ -69,9 +71,16 @@ public class NaiveKNNTest extends junit.framework.TestCase {
 		assertEquals(1.0, knn.distanceTable.get(2, 3));
 	}
 	
-	public void testFullData() throws Exception {
+	/* public void testFullData() throws Exception {
 		File indexFile = new File("/tmp/test.index");
 		RatingStore database = new RatingStore(indexFile);
 		database.createFromFile(new File("training_set"));
+	} */
+	
+	public void testLoadNeustore() throws Exception {
+		MovieID_Ratings index;
+		index = new MovieID_Ratings(new LRUBuffer (5, 4096), "training_set.neu", 0);
+		
+		System.out.println(index.getRatingsById(1000));
 	}
 }

@@ -12,8 +12,6 @@ import java.util.regex.Pattern;
 
 import database.RatingStore;
 
-import neustore.base.LRUBuffer;
-
 
 public class MovieRatings extends junit.framework.TestCase implements Iterable<UserRating>{
 	

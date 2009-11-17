@@ -2,12 +2,11 @@ package database;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
+import java.io.IOException;
 
 import neustore.base.LRUBuffer;
 import MovieID_Ratings.MovieID_Ratings;
 import MovieID_Ratings.MovieRatings;
-import MovieID_Ratings.UserRating;
 
 public class RatingStore {
 	
@@ -40,45 +39,48 @@ public class RatingStore {
 		loadFromFile(ratingsDirectory, false);
 	}
 	
+	/* strict precondition: ratingsDirectory is a directory */
 	private void loadFromFile(File ratingsDirectory, boolean create) throws FileNotFoundException {
-		ArrayList<MovieRatings> movieRatingsList = new ArrayList<MovieRatings>();
+		MovieID_Ratings index = null;
+		try {
+			index = new MovieID_Ratings(new LRUBuffer (5, 4096), indexFile.getAbsolutePath(), create? 1 : 0);
+		} catch(IOException e) {
+			System.err.println("IOException while populating MovieID_Ratings index");
+			System.exit(0);
+		}
 		
 		if(!ratingsDirectory.canRead()) {
 			System.err.println("Can't open file: " + ratingsDirectory);
 			throw new FileNotFoundException();
 		}
-		if(ratingsDirectory.isDirectory()) {
+		
+		MovieRatings currentMovieRatings;
+		try {
 			File[] movieFiles = ratingsDirectory.listFiles();
 			
+			int currentMovie = 1;
 			for(File file: movieFiles) {
-				movieRatingsList.add(new MovieRatings(file));
+				if(currentMovie % 100 == 0)
+					System.out.println("Reading Movie #" + currentMovie);
+				currentMovie++;
+				currentMovieRatings = new MovieRatings(file);
+				index.insertEntry(currentMovieRatings);
 			}
-		} else {
-			movieRatingsList.add(new MovieRatings(ratingsDirectory));
+	
+			index.close();
+		} catch (IOException e) {
+			System.err.println("input \"directory\" not a directory at all _or_ another input error on dataset read blurfy hurp");
+			System.exit(0);
 		}
 		
-		for(MovieRatings movieRatings: movieRatingsList) {
+		/* for(MovieRatings movieRatings: movieRatingsList) {
 			System.out.println("Movie Id: " + movieRatings.getMovieID());
 			for(UserRating userRating: movieRatings) {
 				System.out.println("\tUser: " + userRating.userId + " Rating: " + userRating.rating + " Date: " + userRating.date);
 			}
-		}
+		} */
 		
 		// Write the movie ratings into an index
-		MovieID_Ratings index = null;
-		try{
-			
-			index = new MovieID_Ratings(new LRUBuffer (5, 4096), indexFile.getAbsolutePath(), create? 1 : 0);
-			for(MovieRatings movieRatings: movieRatingsList) {
-				index.insertEntry(movieRatings);
-			}
-			index.close();
-		} catch(Exception e) {
-			// TODO: handle exceptions in a less retarded way.
-			System.err.println("Insert F##Xed up");
-			e.printStackTrace();
-			System.exit(1);
-		}
 	}
 
 }

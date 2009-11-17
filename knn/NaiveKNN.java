@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import neustore.base.LRUBuffer;
 import MovieID_Ratings.MovieID_Ratings;
@@ -38,7 +37,6 @@ public class NaiveKNN {
 		
 		int movieID = 1; // TODO: use the total later for iterating/sorting
 		for(;; movieID++){
-			System.out.println("curMovie: " + movieID);
 			ArrayList<UserRating> ratings = testObject.getRatingsById(movieID);
 			if(ratings == null){
 				break;
@@ -58,7 +56,7 @@ public class NaiveKNN {
 					break;
 				}
 				
-				System.out.println("otherRatings.size(): " + otherRatings.size());
+				// System.out.println("otherRatings.size(): " + otherRatings.size());
 				
 				HashMap<Integer, Integer> bRatings = new HashMap<Integer, Integer>();
 				
