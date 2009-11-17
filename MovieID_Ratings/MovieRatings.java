@@ -16,7 +16,7 @@ import database.RatingStore;
 import neustore.base.LRUBuffer;
 
 
-public class MovieRatings extends junit.framework.TestCase implements Iterable<UserRating>{
+public class MovieRatings implements Iterable<UserRating>{
 	
 	private int _movieID;
 	protected final ArrayList<UserRating> _userRatings = new ArrayList<UserRating>();
@@ -27,7 +27,6 @@ public class MovieRatings extends junit.framework.TestCase implements Iterable<U
 	 * Should only be used for testing
 	 */
 	MovieRatings() {
-		/* TODO: empty constructor only should be used for junit test */
 	}
 	
 	/**
@@ -115,35 +114,6 @@ public class MovieRatings extends junit.framework.TestCase implements Iterable<U
 		}
 		
 		out.close();
-	}
-	
-	/* unit tests */
-	public void testPatternMatching() {
-		Matcher matcher = ratingPattern.matcher("1234,3,2009-04-12\n");
-		matcher.find();
-		assertEquals("1234", matcher.group(1));
-		assertEquals("2009-04-12",matcher.group(3));
-	}
-	
-	public void testIdPattern() {
-		Matcher matcher = idPattern.matcher("1234:\n");
-		matcher.find();
-		assertEquals("1234", matcher.group(1));
-	}
-	
-	/**
-	 * This test just reads and writes a file
-	 * as sort of an end to end test.  To make sure the
-	 * data was read/written correctly, do a
-	 * diff from the command line after the test runs
-	 * 
-	 */
-	public void testWrite() {
-		
-		MovieRatings movie = new MovieRatings(new File("data/test.txt"));
-		try {
-		movie.writeToFile(new File("data/testwrite.txt"));
-		} catch(Exception e) {}
 	}
 	
 	public static void main(String[] args) {
