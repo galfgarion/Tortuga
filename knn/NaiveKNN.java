@@ -7,16 +7,17 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import neustore.base.LRUBuffer;
 import MovieID_Ratings.MovieID_Ratings;
+import MovieID_Ratings.MovieRatings;
 import MovieID_Ratings.UserRating;
 
 public class NaiveKNN {
 	
 	int movieIDLimit;
 	DistanceTable distanceTable = new DistanceTable();
+	private File _indexFile;
 	
 	/**
 	 * For testing only
@@ -34,6 +35,7 @@ public class NaiveKNN {
 	}
 	
 	public NaiveKNN(File indexFile) throws Exception {
+		_indexFile = indexFile;
 		MovieID_Ratings testObject = new MovieID_Ratings(new LRUBuffer(5, 4096), indexFile.getAbsolutePath(), 0);
 		
 		int movieID = 1; // TODO: use the total later for iterating/sorting
@@ -114,6 +116,29 @@ public class NaiveKNN {
 		Collections.sort(neighbors);
 		
 		return neighbors.subList(0, k);
+	}
+	
+	/**
+	 * 
+	 * @param userId
+	 * @param movieId
+	 * @return the average of average ratings of the k nearest neighbors
+	 */
+	float predictRating(int userId, int movieId) {
+		assert(_indexFile != null);
+		final int k = 5;
+		List<Neighbor> nearestNeighbors = nearestNeighbors(k, movieId);
+		int sum = 0;
+		// TODO: would be nice to be able to iterate through ratings in index instead of having to load index
+		// and retrieve them one by one
+		for(Neighbor neighbor: nearestNeighbors) {
+			MovieRatings neighborRatings = new MovieRatings(neighbor.id, _indexFile);
+			sum += neighborRatings.averageRating();
+		}
+		assert(k != 0);
+		float averageRating = (float) sum / k;
+		
+		return averageRating;
 	}
 	
 	private static class Pair {

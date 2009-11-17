@@ -3,6 +3,7 @@ package MovieID_Ratings;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -18,23 +19,60 @@ import neustore.base.LRUBuffer;
 public class MovieRatings extends junit.framework.TestCase implements Iterable<UserRating>{
 	
 	private int _movieID;
-	private ArrayList<UserRating> _userRatings = new ArrayList<UserRating>();
+	protected final ArrayList<UserRating> _userRatings = new ArrayList<UserRating>();
 	static Pattern ratingPattern = Pattern.compile("(\\d+),(\\d),(\\d{4}-\\d{2}-\\d{2})");
 	static Pattern idPattern = Pattern.compile("^\\s*(\\d+):\\s*$");
 	
-	public MovieRatings() {
+	/**
+	 * Should only be used for testing
+	 */
+	MovieRatings() {
 		/* TODO: empty constructor only should be used for junit test */
 	}
 	
-	public MovieRatings(int movieID) {
+	/**
+	 * Should only be used for testing
+	 * @param movieID
+	 */
+	MovieRatings(int movieID) {
 		_movieID = movieID;
 	}
+	
+	/**
+	 * Loads a set of ratings for movie with id movieId from a NeuStore index file ratingsIndex
+	 * @param movieId
+	 * @param ratingsIndex
+	 */
+	public MovieRatings(int movieID, File indexFile) {
+		try {
+		MovieID_Ratings ratingsIndex = new MovieID_Ratings(new LRUBuffer(5, 4096), indexFile.getAbsolutePath(), 0);
+		_movieID = movieID;
+		_userRatings.addAll(ratingsIndex.getRatingsById(movieID));
+		ratingsIndex.close();
+		} catch (IOException e) {
+			e.printStackTrace(System.err);
+		}
+	}
+	
 	public MovieRatings(File ratingsFile) {
 		try {
 			loadFromFile(ratingsFile);
 		} catch(Exception e) {
 			System.err.println("Couldn't load file: " + e);
 		}
+	}
+	
+	public float averageRating() {
+		if(_userRatings.isEmpty()) {
+			return 0.0f;
+		}
+		int size = _userRatings.size();
+		int sum = 0;
+		for(UserRating rating: _userRatings) {
+			sum += rating.rating;
+		}
+		
+		return (float)sum / size;
 	}
 	
 	public void loadFromFile(File file) throws Exception {
