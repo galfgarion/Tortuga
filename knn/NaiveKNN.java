@@ -15,8 +15,8 @@ import MovieID_Ratings.UserRating;
 
 public class NaiveKNN {
 	
-	int movieIDLimit;
-	DistanceTable distanceTable = new DistanceTable();
+	protected int movieIDLimit;
+	protected DistanceTable distanceTable = new DistanceTable();
 	private File _indexFile;
 	
 	/**
@@ -124,7 +124,7 @@ public class NaiveKNN {
 	 * @param movieId
 	 * @return the average of average ratings of the k nearest neighbors
 	 */
-	float predictRating(int userId, int movieId) {
+	public float predictRating(int userId, int movieId) {
 		assert(_indexFile != null);
 		final int k = 5;
 		List<Neighbor> nearestNeighbors = nearestNeighbors(k, movieId);

@@ -1,7 +1,6 @@
 package knn;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.List;
 
 import database.RatingStore;
@@ -61,7 +60,6 @@ public class NaiveKNNTest extends junit.framework.TestCase {
 		database.createFromFile(new File("fake_data"));
 		
 		NaiveKNN knn = new NaiveKNN(indexFile);
-		List<Neighbor> neighbors = knn.nearestNeighbors(2, 1);
 		
 		assertEquals(1.0, knn.distanceTable.get(1, 2));
 		assertEquals(1.0, knn.distanceTable.get(2, 1));

@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import neustore.base.LRUBuffer;
 import MovieID_Ratings.MovieID_Ratings;
 import MovieID_Ratings.MovieRatings;
-import MovieID_Ratings.UserRating;
 
 public class RatingStore {
 	
