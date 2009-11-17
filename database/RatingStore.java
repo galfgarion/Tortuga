@@ -79,8 +79,6 @@ public class RatingStore {
 				System.out.println("\tUser: " + userRating.userId + " Rating: " + userRating.rating + " Date: " + userRating.date);
 			}
 		} */
-		
-		// Write the movie ratings into an index
 	}
 
 }

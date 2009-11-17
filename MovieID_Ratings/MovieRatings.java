@@ -3,6 +3,7 @@ package MovieID_Ratings;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -10,29 +11,67 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import neustore.base.LRUBuffer;
+
 import database.RatingStore;
 
 
-public class MovieRatings extends junit.framework.TestCase implements Iterable<UserRating>{
+public class MovieRatings implements Iterable<UserRating>{
 	
 	private int _movieID;
-	private ArrayList<UserRating> _userRatings = new ArrayList<UserRating>();
+	protected final ArrayList<UserRating> _userRatings = new ArrayList<UserRating>();
 	static Pattern ratingPattern = Pattern.compile("(\\d+),(\\d),(\\d{4}-\\d{2}-\\d{2})");
 	static Pattern idPattern = Pattern.compile("^\\s*(\\d+):\\s*$");
 	
-	public MovieRatings() {
-		/* TODO: empty constructor only should be used for junit test */
+	/**
+	 * Should only be used for testing
+	 */
+	MovieRatings() {
 	}
 	
-	public MovieRatings(int movieID) {
+	/**
+	 * Should only be used for testing
+	 * @param movieID
+	 */
+	MovieRatings(int movieID) {
 		_movieID = movieID;
 	}
+	
+	/**
+	 * Loads a set of ratings for movie with id movieId from a NeuStore index file ratingsIndex
+	 * @param movieId
+	 * @param ratingsIndex
+	 */
+	public MovieRatings(int movieID, File indexFile) {
+		try {
+		MovieID_Ratings ratingsIndex = new MovieID_Ratings(new LRUBuffer(5, 4096), indexFile.getAbsolutePath(), 0);
+		_movieID = movieID;
+		_userRatings.addAll(ratingsIndex.getRatingsById(movieID));
+		ratingsIndex.close();
+		} catch (IOException e) {
+			e.printStackTrace(System.err);
+		}
+	}
+	
 	public MovieRatings(File ratingsFile) {
 		try {
 			loadFromFile(ratingsFile);
 		} catch(Exception e) {
 			System.err.println("Couldn't load file: " + e);
 		}
+	}
+	
+	public float averageRating() {
+		if(_userRatings.isEmpty()) {
+			return 0.0f;
+		}
+		int size = _userRatings.size();
+		int sum = 0;
+		for(UserRating rating: _userRatings) {
+			sum += rating.rating;
+		}
+		
+		return (float)sum / size;
 	}
 	
 	public void loadFromFile(File file) throws Exception {
@@ -75,35 +114,6 @@ public class MovieRatings extends junit.framework.TestCase implements Iterable<U
 		}
 		
 		out.close();
-	}
-	
-	/* unit tests */
-	public void testPatternMatching() {
-		Matcher matcher = ratingPattern.matcher("1234,3,2009-04-12\n");
-		matcher.find();
-		assertEquals("1234", matcher.group(1));
-		assertEquals("2009-04-12",matcher.group(3));
-	}
-	
-	public void testIdPattern() {
-		Matcher matcher = idPattern.matcher("1234:\n");
-		matcher.find();
-		assertEquals("1234", matcher.group(1));
-	}
-	
-	/**
-	 * This test just reads and writes a file
-	 * as sort of an end to end test.  To make sure the
-	 * data was read/written correctly, do a
-	 * diff from the command line after the test runs
-	 * 
-	 */
-	public void testWrite() {
-		
-		MovieRatings movie = new MovieRatings(new File("data/test.txt"));
-		try {
-		movie.writeToFile(new File("data/testwrite.txt"));
-		} catch(Exception e) {}
 	}
 	
 	public static void main(String[] args) {

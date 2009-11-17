@@ -63,6 +63,7 @@ public class NaiveKNNTest extends junit.framework.TestCase {
 		database.createFromFile(new File("fake_data"));
 		
 		NaiveKNN knn = new NaiveKNN(indexFile);
+
 		knn.nearestNeighbors(2, 1);
 		
 		assertEquals(1.0, knn.distanceTable.get(1, 2));
