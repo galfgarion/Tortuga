@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import movieRatings.MovieID_Ratings;
 import neustore.base.LRUBuffer;
-import MovieID_Ratings.MovieID_Ratings;
 
 import junit.framework.TestCase;
 

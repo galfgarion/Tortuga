@@ -8,10 +8,10 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import movieRatings.MovieID_Ratings;
+import movieRatings.MovieRatings;
+import movieRatings.UserRating;
 import neustore.base.LRUBuffer;
-import MovieID_Ratings.MovieID_Ratings;
-import MovieID_Ratings.MovieRatings;
-import MovieID_Ratings.UserRating;
 
 public class NaiveKNN {
 	

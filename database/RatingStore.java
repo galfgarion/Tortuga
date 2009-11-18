@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
+import movieRatings.MovieID_Ratings;
+import movieRatings.MovieRatings;
 import neustore.base.LRUBuffer;
-import MovieID_Ratings.MovieID_Ratings;
-import MovieID_Ratings.MovieRatings;
 
 public class RatingStore {
 	
