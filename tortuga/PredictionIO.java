@@ -16,12 +16,15 @@ import movieRatings.MovieRatings;
 public class PredictionIO {
 	
 	final File _qualifyingSet;
+	final File _outputFile;
 	private PrintStream _printStream;
 	final Predictor _predictor;
 	
-	public PredictionIO(File qualifyingSet, Predictor predictor) {
+	
+	public PredictionIO(File qualifyingSet, File outputFile, Predictor predictor) {
 		_qualifyingSet = qualifyingSet;
 		_predictor = predictor;
+		_outputFile = outputFile;
 	}
 	
 	/**
@@ -43,8 +46,7 @@ public class PredictionIO {
 
 	private void openOutput() throws FileNotFoundException{
 		// TODO Auto-generated method stub
-		File outputFile = new File(Predictor.class.getName() + new Date().toString());
-		OutputStream outputStream = new FileOutputStream(outputFile);
+		OutputStream outputStream = new FileOutputStream(_outputFile);
 		_printStream = new PrintStream(outputStream);
 	}
 
@@ -85,7 +87,6 @@ public class PredictionIO {
 	}
 
 	private void printRating(float rating) {
-		// TODO Auto-generated method stub
 		_printStream.println(rating);
 	}
 
@@ -93,6 +94,27 @@ public class PredictionIO {
 		FileInputStream fstream = new FileInputStream(_qualifyingSet);
 		Scanner scanner = new Scanner(fstream);
 		return scanner;
+	}
+	
+	private static class EnthusiasticRecommender implements tortuga.Predictor {
+		@Override
+		public float predictRating(int movieID, int userID) {
+			return userID;
+		}
+		
+	}
+	
+	public static void main(String[] args) {
+		File qualifyingSet = new File("/vm/tortuga/download/qualifying.txt");
+		Predictor predictor = new EnthusiasticRecommender();
+		File outputFile = new File("/vm/tortuga/", predictor.getClass().getName() + " " + new Date().toString());
+		PredictionIO predictionIO = new PredictionIO(qualifyingSet, outputFile, new EnthusiasticRecommender());
+		
+		try {
+			predictionIO.run();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace(System.err);
+		}
 	}
 
 }
