@@ -3,6 +3,7 @@ package neustore.base;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
@@ -92,11 +93,11 @@ public abstract class DBIndex {
 		else {
 			File f = new File(filename);
 			if (!f.exists()) {
-				System.err.println("File does not exist!"); System.exit(0); 
+				throw new FileNotFoundException("File does not exist: " + f.toString()); 
 			}
 			file = new RandomAccessFile(f, "rw");
 			if (file.readInt() != -1) {
-				System.err.println("Illegal file opened!"); System.exit(0);
+				throw new IOException("Illegal file opened!");
 			}
 			pageSize = file.readInt();
 			file.seek(0);

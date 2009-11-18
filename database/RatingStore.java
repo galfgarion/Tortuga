@@ -26,7 +26,7 @@ public class RatingStore {
 	 * 
 	 * @param ratingsFile
 	 */
-	public void createFromFile(File ratingsFile) throws FileNotFoundException {
+	public void createFromFile(File ratingsFile) throws IOException {
 		loadFromFile(ratingsFile, true);
 	}
 	/**
@@ -35,18 +35,18 @@ public class RatingStore {
 	 * 
 	 * @param ratingsFile
 	 */
-	public void appendFromFile(File ratingsDirectory) throws FileNotFoundException {
+	public void appendFromFile(File ratingsDirectory) throws IOException {
 		loadFromFile(ratingsDirectory, false);
 	}
 	
 	/* strict precondition: ratingsDirectory is a directory */
-	private void loadFromFile(File ratingsDirectory, boolean create) throws FileNotFoundException {
+	private void loadFromFile(File ratingsDirectory, boolean create) throws IOException {
 		MovieID_Ratings index = null;
 		try {
 			index = new MovieID_Ratings(new LRUBuffer (5, 4096), indexFile.getAbsolutePath(), create? 1 : 0);
 		} catch(IOException e) {
 			System.err.println("IOException while populating MovieID_Ratings index");
-			System.exit(0);
+			throw e;
 		}
 		
 		if(!ratingsDirectory.canRead()) {
@@ -70,7 +70,7 @@ public class RatingStore {
 			index.close();
 		} catch (IOException e) {
 			System.err.println("input \"directory\" not a directory at all _or_ another input error on dataset read blurfy hurp");
-			System.exit(0);
+			throw e;
 		}
 		
 		/* for(MovieRatings movieRatings: movieRatingsList) {

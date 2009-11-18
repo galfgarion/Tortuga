@@ -11,7 +11,7 @@ import junit.framework.TestCase;
 
 public class RatingStoreTest extends TestCase {
 	
-	public void testCreateFromFiles() throws FileNotFoundException {
+	public void testCreateFromFiles() throws IOException {
 		File testIndexName = new File("test.index");
 		File testDir = new File("data");
 		

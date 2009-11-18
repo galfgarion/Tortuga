@@ -131,7 +131,7 @@ public class MovieRatings implements Iterable<UserRating>{
 		RatingStore store = new RatingStore(ratingsDir);
 		try {
 			store.createFromFile(ratingsDir);
-		} catch(FileNotFoundException e) {
+		} catch(IOException e) {
 			System.out.println("file not found in unique identifier kfwekakerw!lel1shurf");
 		}
 		
