@@ -11,9 +11,9 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import database.RatingStore;
-
 import neustore.base.LRUBuffer;
+
+import database.RatingStore;
 
 
 public class MovieRatings implements Iterable<UserRating>{

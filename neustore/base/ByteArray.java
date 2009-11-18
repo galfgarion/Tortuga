@@ -70,7 +70,8 @@ public class ByteArray {
 	 * @throws IOException
 	 */
 	public void read( byte[] b ) throws IOException {
-		System.err.println("bytes read (should be 1): " + in.read(b));
+		// System.err.println("bytes read (should be 1): " + in.read(b));
+		in.read(b);
 	}
 	
 	/**

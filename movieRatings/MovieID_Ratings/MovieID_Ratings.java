@@ -104,8 +104,6 @@ public class MovieID_Ratings extends DBIndex {
 			for ( int currentPageID=1; currentPageID<=lastPageID; currentPageID++ ) {
 				MovieID_RatingsPage currentPage = myReadPage(currentPageID);
 				ratingsToAdd = currentPage.getRatingsById(TargetNodeId);
-				/* if(ratingsToAdd != null)
-					System.err.println(ratingsToAdd); */
 				if(returnRecord.size() > 0 && ratingsToAdd == null)
 					return returnRecord;
 				else if(ratingsToAdd != null)

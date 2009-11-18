@@ -59,6 +59,8 @@ public class NaiveKNN {
 					break;
 				}
 				
+				// System.out.println("otherRatings.size(): " + otherRatings.size());
+				
 				HashMap<Integer, Integer> bRatings = new HashMap<Integer, Integer>();
 				
 				// now comparing one movie's set of ratings with another's
