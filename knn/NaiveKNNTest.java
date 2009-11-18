@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.List;
 
 import neustore.base.LRUBuffer;
-import MovieID_Ratings.MovieID_Ratings;
+import movieRatings.MovieID_Ratings;
 
 import database.RatingStore;
 
