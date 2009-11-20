@@ -128,7 +128,7 @@ public class NaiveKNN {
 	 */
 	public float predictRating(int userId, int movieId) {
 		assert(_indexFile != null);
-		final int k = 5;
+		int k = 5;
 		List<Neighbor> nearestNeighbors = nearestNeighbors(k, movieId);
 		int sum = 0;
 		// TODO: would be nice to be able to iterate through ratings in index instead of having to load index
@@ -137,7 +137,14 @@ public class NaiveKNN {
 			MovieRatings neighborRatings = new MovieRatings(neighbor.id, _indexFile);
 			sum += neighborRatings.averageRating();
 		}
-		assert(k != 0);
+		
+		k = nearestNeighbors.size();
+		
+		if(k <= 0) {
+			System.err.println("No nearest neighbors found for movie with movieId: " + movieId);
+			return 0.0f;
+		}
+		assert(k > 0);
 		float averageRating = (float) sum / k;
 		
 		return averageRating;
