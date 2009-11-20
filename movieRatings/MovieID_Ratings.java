@@ -119,7 +119,7 @@ public class MovieID_Ratings extends DBIndex {
 		
 		if(returnRecord.size() > 0)
 			return returnRecord;
-		System.out.println("shouldn't get here unless the movie isn't in the db: " + returnRecord.size());
+		System.out.println("shouldn't get here unless the movie isn't in the db: " + TargetNodeId);
 		return null;
 	}
 	
