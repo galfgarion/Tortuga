@@ -12,7 +12,23 @@ import knn.NaiveKNN.DistanceTable;
 
 public class NaiveKNNTest extends junit.framework.TestCase {
 	
+	public void testDistanceTable() {
+		DistanceTable distances = new DistanceTable();
+		
+		distances.put(1, 1, 0);
+		distances.put(1, 2, 2);
+		distances.put(2, 3, 5);
+		
+		assertEquals(true, distances.getMovieIds().contains(1));
+		assertEquals(true, distances.getMovieIds().contains(2));
+		assertEquals(true, distances.getMovieIds().contains(3));
+		
+		assertEquals(false, distances.getMovieIds().contains(4));
+		
+	}
+	
 	public void testNearestNeighbors() {
+		assert(false);
 		NaiveKNN knn = new NaiveKNN();
 		DistanceTable distances = new DistanceTable();
 		

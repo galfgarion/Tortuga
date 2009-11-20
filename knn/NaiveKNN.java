@@ -4,16 +4,24 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
+
+import database.RatingStore;
+
+import tortuga.PredictionIO;
+import tortuga.Predictor;
 
 import movieRatings.MovieID_Ratings;
 import movieRatings.MovieRatings;
 import movieRatings.UserRating;
 import neustore.base.LRUBuffer;
 
-public class NaiveKNN {
+public class NaiveKNN implements Predictor {
 	
 	protected int movieIDLimit;
 	protected DistanceTable distanceTable = new DistanceTable();
@@ -92,6 +100,14 @@ public class NaiveKNN {
 		}
 		
 		movieIDLimit = movieID;
+		
+		System.out.println("Done with the index file, closing ...");
+		testObject.close();
+
+		
+		
+		//DEBUG
+		System.out.println(distanceTable);
 	
 	}
 	
@@ -100,7 +116,7 @@ public class NaiveKNN {
 	}
 	
 	/**
-	 * 
+	 * TODO: THIS IS BROKEN!!!
 	 * @param k how many nearest neighbors
 	 * @param movieId for this movie
 	 * @param distances the table of precomputed distances
@@ -109,13 +125,19 @@ public class NaiveKNN {
 	public List<Neighbor> nearestNeighbors(int k, int movieId, DistanceTable distances) {
 		ArrayList<Neighbor> neighbors = new ArrayList<Neighbor>(movieIDLimit - 1);
 		
-		for(int neighborId=1; neighborId < movieIDLimit; neighborId++) {
+		for(int neighborId : distances.getMovieIds()) {
 			if(neighborId != movieId) {
 				neighbors.add(new Neighbor(neighborId, distances.get(movieId, neighborId)));
 			}
 		}
 		
 		Collections.sort(neighbors);
+		
+		if(neighbors.size() <= k) {
+			return neighbors;
+		}
+		
+		assert(neighbors.size() > k);
 		
 		return neighbors.subList(0, k);
 	}
@@ -126,7 +148,7 @@ public class NaiveKNN {
 	 * @param movieId
 	 * @return the average of average ratings of the k nearest neighbors
 	 */
-	public float predictRating(int userId, int movieId) {
+	public float predictRating(int movieId, int userId) {
 		assert(_indexFile != null);
 		int k = 5;
 		List<Neighbor> nearestNeighbors = nearestNeighbors(k, movieId);
@@ -174,6 +196,7 @@ public class NaiveKNN {
 	protected static class DistanceTable {
 		
 		private Hashtable<String, Double> table = new Hashtable<String, Double>();
+		private final Set<Integer> movieIds = new HashSet<Integer>();
 		
 		public void put(int a, int b, double distance) {
 			if(a > b) {
@@ -181,6 +204,13 @@ public class NaiveKNN {
 			} else {
 				table.put(new Pair(a, b).toString(), distance);
 			}
+			
+			movieIds.add(a);
+			movieIds.add(b);
+		}
+		
+		public Set<Integer> getMovieIds() {
+			return movieIds;
 		}
 		
 		public double get(int a, int b) {
@@ -194,6 +224,34 @@ public class NaiveKNN {
 				return distance;
 			}
 		}
+		
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append("Distance table:\n");
+			for(Entry<String, Double> entry: table.entrySet()) {
+				sb.append(entry.getKey());
+				sb.append(" distance: ");
+				sb.append(entry.getValue());
+				sb.append("\n");
+			}
+			return sb.toString();
+		}
+	}
+	
+	public static void main(String[] args) throws Exception {
+		File inputData = new File("/vm/tortuga/fake_data");
+		File indexFile = new File("/vm/tortuga/fake_data.neu");
+		File outputFile = new File("/vm/tortuga/knn_fake_results.txt");
+		File qualifyingSet = new File("/vm/tortuga/fake_qualifying.txt");
+		
+		/*
+		RatingStore database = new RatingStore(indexFile);
+		database.createFromFile(inputData);
+		*/
+		Predictor predictor = new NaiveKNN(indexFile);
+		PredictionIO predictionIO = new PredictionIO(qualifyingSet, outputFile, predictor);
+		
+		predictionIO.run();
 	}
 
 }
