@@ -22,7 +22,13 @@ public class RatingStoreTest extends TestCase {
 		try {
 			testObject = new MovieID_Ratings(new LRUBuffer (5, 4096), "test.index", 0);
 			assertEquals(1488844, testObject.getRatingsById(1).get(0).userId);
-			testObject.close();
+			// testObject.close();
+			
+			
+			testObject = new MovieID_Ratings(new LRUBuffer (5, 4096), "test.index", 0);
+			assertEquals(1488844, testObject.getRatingsById(1).get(0).userId);
+			// testObject.close();
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			System.err.println("WTFBBQ?");

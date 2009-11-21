@@ -101,10 +101,6 @@ public class NaiveKNN implements Predictor {
 		
 		movieIDLimit = movieID;
 		
-		System.out.println("Done with the index file, closing ...");
-		testObject.close();
-
-		
 		
 		//DEBUG
 		System.out.println(distanceTable);
@@ -244,10 +240,9 @@ public class NaiveKNN implements Predictor {
 		File outputFile = new File("/vm/tortuga/knn_fake_results.txt");
 		File qualifyingSet = new File("/vm/tortuga/fake_qualifying.txt");
 		
-		/*
 		RatingStore database = new RatingStore(indexFile);
 		database.createFromFile(inputData);
-		*/
+		
 		Predictor predictor = new NaiveKNN(indexFile);
 		PredictionIO predictionIO = new PredictionIO(qualifyingSet, outputFile, predictor);
 		

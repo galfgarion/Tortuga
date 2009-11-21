@@ -38,6 +38,7 @@ public class MovieRatings implements Iterable<UserRating>{
 	}
 	
 	/**
+	 * TODO 
 	 * Loads a set of ratings for movie with id movieId from a NeuStore index file ratingsIndex
 	 * @param movieId
 	 * @param ratingsIndex
@@ -47,7 +48,6 @@ public class MovieRatings implements Iterable<UserRating>{
 		MovieID_Ratings ratingsIndex = new MovieID_Ratings(new LRUBuffer(5, 4096), indexFile.getAbsolutePath(), 0);
 		_movieID = movieID;
 		_userRatings.addAll(ratingsIndex.getRatingsById(movieID));
-		ratingsIndex.close();
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
 		}

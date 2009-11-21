@@ -59,6 +59,7 @@ public class NaiveKNNTest extends junit.framework.TestCase {
 		assertEquals(2, second.id);
 		assertEquals(2.0, second.distance);
 		
+		
 	}
 	
 	public void testLoadData() throws Exception {
@@ -71,6 +72,7 @@ public class NaiveKNNTest extends junit.framework.TestCase {
 		
 		for(int i=0; i < 5; i++)
 			System.out.println(neighbors.get(i));
+		
 	}
 	
 	public void testFakeData() throws Exception {
