@@ -45,12 +45,17 @@ public class MovieRatings implements Iterable<UserRating>{
 	 */
 	public MovieRatings(int movieID, File indexFile) {
 		try {
-		MovieID_Ratings ratingsIndex = new MovieID_Ratings(new LRUBuffer(5, 4096), indexFile.getAbsolutePath(), 0);
-		_movieID = movieID;
-		_userRatings.addAll(ratingsIndex.getRatingsById(movieID));
+			MovieID_Ratings ratingsIndex = new MovieID_Ratings(new LRUBuffer(5, 4096), indexFile.getAbsolutePath(), 0);
+			_movieID = movieID;
+			_userRatings.addAll(ratingsIndex.getRatingsById(movieID));
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
 		}
+	}
+	
+	public MovieRatings(int movieID, MovieID_Ratings ratingsIndex) {
+		_movieID = movieID;
+		_userRatings.addAll(ratingsIndex.getRatingsById(movieID));
 	}
 	
 	public MovieRatings(File ratingsFile) {
@@ -154,9 +159,35 @@ public class MovieRatings implements Iterable<UserRating>{
 		return _userRatings;
 	}
 	
+	// return the user rating for user
+	// precondition: the rating exists in the list of user ratings
+	public UserRating getRatingByUser(int userId) {
+		for(UserRating rating : _userRatings) {
+			if(rating.userId == userId) {
+				return rating;
+			}
+		}
+		
+		throw new IllegalStateException("Precondition violated:  the user id " + " does not exist in the list of ratings");
+	}
+	
 	@Override
 	public Iterator<UserRating> iterator() {
 		// TODO Auto-generated method stub
 		return _userRatings.iterator();
+	}
+	
+	public boolean remove(Object o) {
+		return _userRatings.remove(o);
+	}
+	
+	public boolean isEmpty() {
+		return _userRatings.isEmpty();
+	}
+	
+	public UserRating removeFirst() {
+		UserRating item = _userRatings.get(0);
+		_userRatings.remove(0);
+		return item;
 	}
 }
