@@ -239,15 +239,14 @@ public class NaiveKNN implements Predictor {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		File inputData = new File("/vm/tortuga/fake_data");
-		File indexFile = new File("/vm/tortuga/fake_data.neu");
-		File outputFile = new File("/vm/tortuga/knn_fake_results.txt");
-		File qualifyingSet = new File("/vm/tortuga/fake_qualifying.txt");
+		File inputData = new File("fake_data");
+		File indexFile = new File("fake_data.neu");
+		File outputFile = new File("knn_fake_results.txt");
+		File qualifyingSet = new File("fake_qualifying.txt");
 		
-		/*
 		RatingStore database = new RatingStore(indexFile);
 		database.createFromFile(inputData);
-		*/
+		
 		Predictor predictor = new NaiveKNN(indexFile);
 		PredictionIO predictionIO = new PredictionIO(qualifyingSet, outputFile, predictor);
 		

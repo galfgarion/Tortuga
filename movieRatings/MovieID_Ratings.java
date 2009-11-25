@@ -2,6 +2,8 @@ package movieRatings;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+
 import neustore.base.*;
 
 /**
@@ -30,12 +32,17 @@ public class MovieID_Ratings extends DBIndex {
 	 */
 	private MovieID_RatingsPage lastPage;
 	
+	private ArrayList<IDLookup> IDLookups;
+	
 	public MovieID_Ratings(DBBuffer _buffer, String filename, int isCreate) throws IOException {
 		super(_buffer, filename, isCreate);
 		pageCapacity = (pageSize-8) / 12; // header of 8 bytes, record of 12 bytes
 		// pageCapacity = 100; // very low and nonexact but good
-		if(isCreate == 1)
+		
+		if(isCreate == 1) {
+			IDLookups = new ArrayList<IDLookup>();
 			lastPage = new MovieID_RatingsPage(pageSize);
+		}
 		else
 			lastPage = myReadPage(lastPageID);
 	}
@@ -65,16 +72,32 @@ public class MovieID_Ratings extends DBIndex {
 	}
 	
 	protected void readIndexHead(byte[] head) {
+		System.out.println("readIndexHead");
 		ByteArray ba = new ByteArray(head, ByteArray.READ);
+		IDLookups = new ArrayList<IDLookup>();
 		try {
 			lastPageID = ba.readInt();
+			int numMovies = ba.readInt();
+			numMovies = ba.readInt();
+			numMovies = ba.readInt();
+			for(int currentMovie = 0; currentMovie < numMovies; currentMovie++)
+				IDLookups.add(new IDLookup(ba.readInt(), ba.readInt()));
+			for(IDLookup l : IDLookups)
+				System.out.println("read " + l.MovieID + " page " + l.PageID);
 		} catch (IOException e) {}
+		Collections.sort(IDLookups);
 	}
 	
 	protected void writeIndexHead (byte[] head) {
 		ByteArray ba = new ByteArray(head, ByteArray.WRITE);
 		try {
+			System.err.println("writing index head");
 			ba.writeInt(lastPageID);
+			ba.writeInt(IDLookups.size());
+			for(IDLookup i : IDLookups) {
+				ba.writeInt(i.MovieID);
+				ba.writeInt(i.PageID);
+			}
 		} catch (IOException e) {}
 	}
 	
@@ -88,24 +111,39 @@ public class MovieID_Ratings extends DBIndex {
 		
 		/* we're often going to have to split records across more than one page; that's probably something
 		 * we need to handle right here */
+
+		int firstPageID = -1; // used to track where the ratings for this movie begin
+		
 		while(key.getUserRatings().size() > 0) {
 			lastPageID = allocate();
+			if(firstPageID == -1)
+				firstPageID = lastPageID;
 			lastPage = new MovieID_RatingsPage(pageSize);
 			lastPage.insert(key, pageCapacity); /* insert max # of records that will fit on one page */
 			buffer.writePage(file, lastPageID, lastPage);
 		}
+		
+		IDLookups.add(new IDLookup(key.getMovieID(), firstPageID));
+		System.out.println("Added new movie " + key.getMovieID() + " at page " + firstPageID);
+		
 		return lastPageID;
 	}
 	
 	public ArrayList<UserRating> getRatingsById (int TargetNodeId)
 	{
 		ArrayList<UserRating> returnRecord = new ArrayList<UserRating>(), ratingsToAdd;
+		
+		int startingPage = Collections.binarySearch(IDLookups, new IDLookup(TargetNodeId, 0));
+		if(startingPage < 0) {
+			System.err.println("MOVIE NOT FOUND: " + TargetNodeId);
+			return null;
+		}
+		startingPage = IDLookups.get(startingPage).PageID;
 		try {
-			for ( int currentPageID=1; currentPageID<=lastPageID; currentPageID++ ) {
+			for ( int currentPageID=startingPage; currentPageID<=lastPageID; currentPageID++ ) {
+				/* check all of this logic after doing the indexing stuff to make sure it's still necessary */
 				MovieID_RatingsPage currentPage = myReadPage(currentPageID);
 				ratingsToAdd = currentPage.getRatingsById(TargetNodeId);
-				/* if(ratingsToAdd != null)
-					System.err.println(ratingsToAdd); */
 				if(returnRecord.size() > 0 && ratingsToAdd == null)
 					return returnRecord;
 				else if(ratingsToAdd != null)
@@ -117,13 +155,30 @@ public class MovieID_Ratings extends DBIndex {
 			System.exit(1);
 		}
 		
-		if(returnRecord.size() > 0)
-			return returnRecord;
-		System.out.println("shouldn't get here unless the movie isn't in the db: " + TargetNodeId);
-		return null;
+		/* again, most of this check at the end should be obsoleted by the IDLookups array if all is functioning well */
+		// if(returnRecord.size() > 0)
+		return returnRecord;
 	}
 	
     public int numPages() {
     	return lastPageID;
+    }
+    
+    private class IDLookup implements Comparable<IDLookup> {
+    	public int MovieID, PageID;
+    	
+    	public IDLookup(int MovieID, int PageID) {
+    		this.MovieID = MovieID;
+    		this.PageID = PageID;
+    	}
+    	
+    	public boolean equals(Object o) {
+    		IDLookup l = (IDLookup) o;
+    		return MovieID == l.MovieID;
+    	}
+    	
+    	public int compareTo(IDLookup o) {
+    		return this.MovieID - o.MovieID;
+    	}
     }
 }

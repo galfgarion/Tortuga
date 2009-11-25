@@ -205,6 +205,7 @@ public abstract class DBIndex {
 		out.writeInt(pageSize);
 		out.writeInt(numPages);
 		System.out.println("numPages on write: " + numPages);
+		// new IOException().printStackTrace();
 		out.writeInt(firstEmpty);
 		out.write(indexHead);
 		
