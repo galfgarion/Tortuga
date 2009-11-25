@@ -91,15 +91,15 @@ public class NaiveKNNTest extends junit.framework.TestCase {
 	}
 	
 	/* public void testFullData() throws Exception {
-		File indexFile = new File("/tmp/test.index");
+		File indexFile = new File("/tmp/training_set.neu");
 		RatingStore database = new RatingStore(indexFile);
 		database.createFromFile(new File("training_set"));
 	} */
 	
 	public void testLoadNeustore() throws Exception {
 		MovieID_Ratings index;
-		index = new MovieID_Ratings(new LRUBuffer (5, 4096), "training_set.neu", 0);
+		index = new MovieID_Ratings(new LRUBuffer (5, 4096), "/tmp/training_set.neu", 0);
 		
-		System.out.println(index.getRatingsById(1000));
+		index.getRatingsById(1000);
 	}
 }
