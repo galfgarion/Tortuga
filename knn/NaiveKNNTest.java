@@ -12,6 +12,14 @@ import knn.NaiveKNN.DistanceTable;
 
 public class NaiveKNNTest extends junit.framework.TestCase {
 	
+	public static void main(String argv[]) {
+		try {
+		testLoadData();
+		} catch (Exception e) {
+			
+		}
+	}
+	
 	public void testDistanceTable() {
 		DistanceTable distances = new DistanceTable();
 		
@@ -58,10 +66,9 @@ public class NaiveKNNTest extends junit.framework.TestCase {
 		assertEquals(1.0, first.distance);
 		assertEquals(2, second.id);
 		assertEquals(2.0, second.distance);
-		
 	}
 	
-	public void testLoadData() throws Exception {
+	public static void testLoadData() throws Exception {
 		File indexFile = new File("/tmp/test.index");
 		RatingStore database = new RatingStore(indexFile);
 		database.createFromFile(new File("data"));
@@ -88,16 +95,17 @@ public class NaiveKNNTest extends junit.framework.TestCase {
 		assertEquals(1.0, knn.distanceTable.get(2, 3));
 	}
 	
-	/* public void testFullData() throws Exception {
-		File indexFile = new File("/tmp/training_set.neu");
+	/* public void testCreateFullDataIndex() throws Exception {
+		File indexFile = new File("/tmp/training_set_indexed2.neu");
 		RatingStore database = new RatingStore(indexFile);
 		database.createFromFile(new File("training_set"));
 	} */
 	
-	public void testLoadNeustore() throws Exception {
+	public void testLoadFullDataIndex() throws Exception {
 		MovieID_Ratings index;
-		index = new MovieID_Ratings(new LRUBuffer (5, 4096), "/tmp/training_set.neu", 0);
-		
-		index.getRatingsById(1000);
+		index = new MovieID_Ratings(new LRUBuffer (5, 4096), "/tmp/training_set_indexed2.neu", 0);
+		long what = System.currentTimeMillis();
+		System.out.println(index.getRatingsById(10000));
+		System.out.println("MS elapsed during search: " + (System.currentTimeMillis() - what));
 	}
 }
