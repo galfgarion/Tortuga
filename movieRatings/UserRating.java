@@ -23,7 +23,7 @@ public class UserRating {
 	}
 	
 	public final int userId;
-	public final int rating;
+	public int rating;
 	public final int date;
 
 }

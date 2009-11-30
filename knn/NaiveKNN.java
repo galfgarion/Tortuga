@@ -101,10 +101,9 @@ public class NaiveKNN implements Predictor {
 		
 		movieIDLimit = movieID;
 		
-		System.out.println("Close here removed, presumably we're just reading");
 		// System.out.println("Done with the index file, closing ...");
 		// testObject.close();
-		
+
 		//DEBUG
 		System.out.println(distanceTable);
 	
