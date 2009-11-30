@@ -68,6 +68,7 @@ import neustore.base.ByteArray;
 public abstract class DBIndex {
 	public static final boolean CREATE = true;
 	public static final boolean OPEN = false;
+	public String inputFilename;
 	
 	/**
 	 * Creates or Opens an index file.
@@ -80,6 +81,7 @@ public abstract class DBIndex {
 	public DBIndex(DBBuffer buffer, String filename, int isCreate) throws IOException {
 		this.buffer = buffer;
 		pageSize = buffer.pageSize;
+		this.inputFilename = filename;
 		
 		if ( isCreate == 1 ) {
 			File f = new File(filename);
@@ -205,7 +207,9 @@ public abstract class DBIndex {
 		out.writeInt(pageSize);
 		out.writeInt(numPages);
 		System.out.println("numPages on write: " + numPages);
-		// new IOException().printStackTrace();
+		/* if(numPages == -1) {
+			// new IOException().printStackTrace();
+		} */
 		out.writeInt(firstEmpty);
 		out.write(indexHead);
 		
