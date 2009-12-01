@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import movieRatings.*;
 
@@ -25,6 +26,7 @@ public class ByteArray {
 	private DataInputStream in = null;
 	private byte[] buf = null;
 	private int offset = 0;
+	private static byte b[] = new byte[1];
 	
 	/**
 	 * Constructor.
@@ -70,8 +72,12 @@ public class ByteArray {
 	 * @throws IOException
 	 */
 	public void read( byte[] b ) throws IOException {
-		// System.err.println("bytes read (should be 1): " + in.read(b));
 		in.read(b);
+	}
+	
+	public byte readByte() throws IOException {
+		in.read(b, 0, 1);
+		return b[0];
 	}
 	
 	/**
@@ -117,15 +123,22 @@ public class ByteArray {
 		System.arraycopy( b, 0, buf, offset, b.length);
 	}
 	
+	public void writeByte( byte b ) throws IOException {
+		byte[] c = new byte[1];
+		c[0] = b;
+		System.arraycopy( c, 0, buf, offset, 1);
+		offset++;
+	}
+	
 	public void writeRating ( UserRating r ) throws IOException {
 		writeInt (r.userId);
 		
 		// is there a more efficient way to do this? should we store the rating as a byte[1] instead?
 		/* byte Rating[] = new byte[1];
 		Rating[0] = r.rating; */
-		writeInt (r.rating);
+		writeByte (r.rating);
 		
-		writeInt (r.date);
+		// writeInt (r.date);
 	}
 	
 	public void writeAttributeRecord(AttributeRecord record) throws IOException {
@@ -153,15 +166,13 @@ public class ByteArray {
 	 * @throws IOException
 	 */
 	public UserRating readMovieRating () throws IOException {
-		int UserID = readInt();
-		
-		/* byte Rating[] = new byte[1];
-		read(Rating); */
-		int Rating = readInt();
-		
-		int DateOfRating = readInt();
-		
-		return new UserRating(UserID, Rating, DateOfRating);
+		/* date temporarily excised to improve performance */
+		return new UserRating(readInt(), readByte());
+	}
+	
+	public void readAllMovieRatings(ArrayList<UserRating> destinationArray, int numRatings) throws IOException {
+		for(int x = 0; x < numRatings; x++)
+			destinationArray.add(new UserRating(in.readInt(), readByte()));
 	}
 	
 	public AttributeRecord readAttributeRecord () throws IOException {

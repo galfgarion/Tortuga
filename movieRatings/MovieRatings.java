@@ -2,7 +2,6 @@ package movieRatings;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -20,6 +19,7 @@ public class MovieRatings implements Iterable<UserRating>{
 	
 	private int _movieID;
 	protected final ArrayList<UserRating> _userRatings = new ArrayList<UserRating>();
+	UserRating[] userRatings;
 	public static Pattern ratingPattern = Pattern.compile("(\\d+),(\\d),(\\d{4}-\\d{2}-\\d{2})");
 	public static Pattern idPattern = Pattern.compile("^\\s*(\\d+):\\s*$");
 	
@@ -97,7 +97,7 @@ public class MovieRatings implements Iterable<UserRating>{
 					byte rating = (byte)Integer.parseInt(matcher.group(2));
 					String date = matcher.group(3);
 					
-					_userRatings.add(new UserRating(userId, rating, date));
+					_userRatings.add(new UserRating(userId, rating /*, date*/));
 				} else {
 					// TODO: log a warning or throw an exception
 				}

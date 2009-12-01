@@ -1,8 +1,12 @@
 package movieRatings;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Scanner;
 
 import neustore.base.*;
 
@@ -36,8 +40,9 @@ public class MovieID_Ratings extends DBIndex {
 	
 	public MovieID_Ratings(DBBuffer _buffer, String filename, int isCreate) throws IOException {
 		super(_buffer, filename, isCreate);
-		pageCapacity = (pageSize-8) / 12; // header of 8 bytes, record of 12 bytes
-		// pageCapacity = 100; // very low and nonexact but good
+		// pageCapacity = (pageSize-8) / 12; // header of 8 bytes, record of 12 bytes (4 user, 4 rating, 4 date)
+		pageCapacity = (pageSize-8) / 5; // header of 8 bytes, record of 5 bytes (4 user, 1 rating)
+		// pageCapacity = 100; // very low and nonexact but it runs
 		
 		if(isCreate == 1) {
 			IDLookups = new ArrayList<IDLookup>();
@@ -71,35 +76,46 @@ public class MovieID_Ratings extends DBIndex {
 		return page;
 	}
 	
+	
+	/*** Start Index Head Methods ***/
+	/* Our index currently stores lastPageID and the total number of movies stored in our DB; the index itself
+	 * is stored in a separate flat text file (the path to the repository with "_index" suffixed) as Neustore
+	 * is hardcoded to limit the index header to a single page. (non-Javadoc)
+	 * @see neustore.base.DBIndex#readIndexHead(byte[])
+	 */
 	protected void readIndexHead(byte[] head) {
-		System.out.println("readIndexHead");
 		ByteArray ba = new ByteArray(head, ByteArray.READ);
 		IDLookups = new ArrayList<IDLookup>();
 		try {
 			lastPageID = ba.readInt();
+			ba.readInt();
+			ba.readInt();
 			int numMovies = ba.readInt();
-			numMovies = ba.readInt();
-			numMovies = ba.readInt();
+			Scanner sc = new Scanner(new File(inputFilename + "_index"));
 			for(int currentMovie = 0; currentMovie < numMovies; currentMovie++)
-				IDLookups.add(new IDLookup(ba.readInt(), ba.readInt()));
-			for(IDLookup l : IDLookups)
-				System.out.println("read " + l.MovieID + " page " + l.PageID);
-		} catch (IOException e) {}
-		Collections.sort(IDLookups);
+				IDLookups.add(new IDLookup(sc.nextInt(), sc.nextInt()));
+			/* for(IDLookup l : IDLookups)
+				System.out.println("read " + l.MovieID + " page " + l.PageID); */
+			sc.close();
+		} catch (IOException e) { System.err.println("IOException in readIndexHead: " + inputFilename); }
+		Collections.sort(IDLookups); /* theoretically unnecessary if we load the movies in ID order but I'm not chancing an error here */
 	}
 	
 	protected void writeIndexHead (byte[] head) {
 		ByteArray ba = new ByteArray(head, ByteArray.WRITE);
 		try {
-			System.err.println("writing index head");
 			ba.writeInt(lastPageID);
 			ba.writeInt(IDLookups.size());
+			BufferedWriter w = new BufferedWriter(new FileWriter(inputFilename + "_index"));
 			for(IDLookup i : IDLookups) {
-				ba.writeInt(i.MovieID);
-				ba.writeInt(i.PageID);
+				w.write(i.MovieID + " " + i.PageID + "\n"); /* keeping this human-readable for now--one-time cost, no need to optimize */
 			}
+			w.flush();
+			w.close();
 		} catch (IOException e) {}
 	}
+	
+	/*** End Index Head Methods ***/
 	
 	/**
 	 * Appends a new MovieRating to the end of the file.
@@ -124,7 +140,7 @@ public class MovieID_Ratings extends DBIndex {
 		}
 		
 		IDLookups.add(new IDLookup(key.getMovieID(), firstPageID));
-		System.out.println("Added new movie " + key.getMovieID() + " at page " + firstPageID);
+		// System.out.println("Added new movie " + key.getMovieID() + " at page " + firstPageID);
 		
 		return lastPageID;
 	}
@@ -134,10 +150,8 @@ public class MovieID_Ratings extends DBIndex {
 		ArrayList<UserRating> returnRecord = new ArrayList<UserRating>(), ratingsToAdd;
 		
 		int startingPage = Collections.binarySearch(IDLookups, new IDLookup(TargetNodeId, 0));
-		if(startingPage < 0) {
-			System.err.println("MOVIE NOT FOUND: " + TargetNodeId);
+		if(startingPage < 0) /* Movie was not found in our database */
 			return null;
-		}
 		startingPage = IDLookups.get(startingPage).PageID;
 		try {
 			for ( int currentPageID=startingPage; currentPageID<=lastPageID; currentPageID++ ) {
@@ -148,7 +162,6 @@ public class MovieID_Ratings extends DBIndex {
 					return returnRecord;
 				else if(ratingsToAdd != null)
 					returnRecord.addAll(ratingsToAdd);
-				buffer.writePage(file, currentPageID, currentPage); // why is this being done on a read? to preserve consistency after improper shutdown? leaving it for now but only pending investigation	
 			}
 		} catch(IOException e) {
 			System.err.println("IOException in getRecordById: " + e.toString());

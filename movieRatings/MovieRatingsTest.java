@@ -11,9 +11,9 @@ public class MovieRatingsTest extends TestCase {
 		MovieRatings testRatings = new MovieRatings();
 		
 		assertEquals(0.0f, testRatings.averageRating());
-		testRatings._userRatings.add(new UserRating(1, 3, 0));
+		testRatings._userRatings.add(new UserRating(1, (byte)3, 0));
 		assertEquals(3.0f, testRatings.averageRating());
-		testRatings._userRatings.add(new UserRating(1, 4, 0));
+		testRatings._userRatings.add(new UserRating(1, (byte)4, 0));
 		assertEquals(3.5f, testRatings.averageRating());
 	}
 	

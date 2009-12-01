@@ -14,7 +14,8 @@ public class NaiveKNNTest extends junit.framework.TestCase {
 	
 	public static void main(String argv[]) {
 		try {
-		testLoadData();
+			Thread.currentThread().sleep(45000);
+			testLoadFullDataIndex();
 		} catch (Exception e) {
 			
 		}
@@ -96,17 +97,19 @@ public class NaiveKNNTest extends junit.framework.TestCase {
 		assertEquals(1.0, knn.distanceTable.get(2, 3));
 	}
 	
-	/* public void testCreateFullDataIndex() throws Exception {
+	public void testCreateFullDataIndex() throws Exception {
 		File indexFile = new File("/tmp/training_set_indexed2.neu");
 		RatingStore database = new RatingStore(indexFile);
 		database.createFromFile(new File("training_set"));
-	} */
+	}
 	
-	public void testLoadFullDataIndex() throws Exception {
+	public static void testLoadFullDataIndex() throws Exception {
 		MovieID_Ratings index;
-		index = new MovieID_Ratings(new LRUBuffer (5, 4096), "/tmp/training_set_indexed2.neu", 0);
+		index = new MovieID_Ratings(new LRUBuffer (1, 4096), "/tmp/training_set_indexed2.neu", 0);
 		long what = System.currentTimeMillis();
-		System.out.println(index.getRatingsById(10000));
+		for(int x = 1; x < 17770; x++)
+			index.getRatingsById(x);
+		System.out.println(index.getRatingsById(17770));
 		System.out.println("MS elapsed during search: " + (System.currentTimeMillis() - what));
 	}
 }

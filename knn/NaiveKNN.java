@@ -54,7 +54,7 @@ public class NaiveKNN implements Predictor {
 			}
 			
 			// user ratings from movie A
-			HashMap<Integer, Integer> aRatings = new HashMap<Integer, Integer>();
+			HashMap<Integer, Byte> aRatings = new HashMap<Integer, Byte>();
 			
 			for(UserRating r: ratings) {
 				aRatings.put(r.userId, r.rating);
@@ -69,7 +69,7 @@ public class NaiveKNN implements Predictor {
 				
 				// System.out.println("otherRatings.size(): " + otherRatings.size());
 				
-				HashMap<Integer, Integer> bRatings = new HashMap<Integer, Integer>();
+				HashMap<Integer, Byte> bRatings = new HashMap<Integer, Byte>();
 				
 				// now comparing one movie's set of ratings with another's
 				for(UserRating r : otherRatings) {
@@ -79,7 +79,7 @@ public class NaiveKNN implements Predictor {
 				int ratingTotal = 0;
 				int ratingCounter = 0;
 				
-				for(Map.Entry<Integer, Integer> entry : aRatings.entrySet()){
+				for(Map.Entry<Integer, Byte> entry : aRatings.entrySet()){
 					if(bRatings.containsKey(entry.getKey()) ) {
 						int squareDiff = entry.getValue() - bRatings.get(entry.getKey());
 						squareDiff = squareDiff * squareDiff;

@@ -13,7 +13,7 @@ import neustore.base.ByteArray;
  * @author Donghui Zhang &lt;donghui@ccs.neu.edu&gt;
  */
 public class MovieID_RatingsPage extends DBPage {
-	private MovieRatings MovieAndRatings;
+	public MovieRatings MovieAndRatings;
 	
 	public MovieID_RatingsPage( int _pageSize ) {
 		super(1, _pageSize);
@@ -58,8 +58,8 @@ public class MovieID_RatingsPage extends DBPage {
 		int numRecs = ba.readInt();
 		
 		MovieAndRatings = new MovieRatings(MovieID);
-		for(int RecordNum = 0; RecordNum < numRecs; RecordNum++)
-			MovieAndRatings.add(ba.readMovieRating());
+		MovieAndRatings._userRatings.ensureCapacity(numRecs);
+		ba.readAllMovieRatings(MovieAndRatings._userRatings, numRecs);
 	}
 	
 	protected void write( byte[] b ) throws IOException {

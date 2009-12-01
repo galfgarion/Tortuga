@@ -6,11 +6,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -78,7 +75,7 @@ public class RatingEvaluator {
 			
 			
 			for(UserRating rating: trainingRatings) {
-				fakeTrainingRatings.add(new FakeUserRating(rating.userId, rating.rating, rating.date));
+				fakeTrainingRatings.add(new FakeUserRating(rating.userId, rating.rating/*, rating.date*/));
 			}
 			
 			Collections.sort(fakeTrainingRatings);
@@ -100,8 +97,8 @@ public class RatingEvaluator {
 	
 
 	private static class FakeUserRating extends UserRating implements Comparable<FakeUserRating> {
-		public FakeUserRating(int userId, int rating, int date) {
-			super(userId, rating, date);
+		public FakeUserRating(int userId, byte rating/*, int date*/) {
+			super(userId, rating /*, date*/);
 		}
 
 		@Override
@@ -130,7 +127,7 @@ public class RatingEvaluator {
 				return userRatings;
 			}
 			String line = sc.nextLine();
-			userRatings.add(new FakeUserRating(Integer.parseInt(line), 0, 0));
+			userRatings.add(new FakeUserRating(Integer.parseInt(line), (byte)0/*, 0*/));
 		}
 		
 		return userRatings;
