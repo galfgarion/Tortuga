@@ -1,5 +1,7 @@
 package svd;
 
+import java.io.File;
+
 import tortuga.Predictor;
 import tortuga.PredictionIO;
 
@@ -28,5 +30,11 @@ public class SVDPredictor implements Predictor{
 	public float predictRating(int movieID, int userID){
 		float result = 0;
 		return result;
+	}
+
+	@Override
+	public float predictRating(int movieID, int userID) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }
