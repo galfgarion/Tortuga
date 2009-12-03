@@ -31,13 +31,8 @@ public class SVDBuilder {
 		
 		for(int row=0; row<rows; ++row) {
 			ratings = theRatings.getRatingsById(row+1);
-			// for(int col=0; col<cols; ++col){
 			for(UserRating r : ratings) {
 				svdbuild.setQuick(row,r.userId, r.rating);
-				//temp = (double)ratings.get(col).rating;
-				
-				//if(temp != null)
-					//matrix[row][col] = temp;
 			}
 		}
 		
