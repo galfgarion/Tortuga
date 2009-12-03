@@ -3,11 +3,10 @@ package svd;
 import java.io.File;
 
 import tortuga.Predictor;
-import tortuga.PredictionIO;
 
 import java.io.*;
 
-import cern.colt.matrix.impl.*;
+import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.linalg.*;
 
 public class SVDPredictor implements Predictor{
@@ -50,6 +49,6 @@ public class SVDPredictor implements Predictor{
 	}
 	
 	public float predictRating(int movieID, int userID){
-		return svdRecon.get(movieID, userID);
+		return (float)svdRecon.get(movieID, userID);
 	}
 }
