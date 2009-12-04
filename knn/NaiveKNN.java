@@ -11,20 +11,21 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import database.RatingStore;
 
 import tortuga.PredictionIO;
 import tortuga.Predictor;
 
 import movieRatings.MovieID_Ratings;
-import movieRatings.MovieRatings;
 import movieRatings.UserRating;
 import neustore.base.LRUBuffer;
 
 public class NaiveKNN implements Predictor {
 	
+	// 100: 0m42s
+	public final static int LIMIT = 100;
 	protected int movieIDLimit;
 	protected DistanceTable distanceTable = new DistanceTable();
+	protected final ArrayList<Float> averageRatingTable = new ArrayList<Float>(LIMIT + 1);
 	private File _indexFile;
 	
 	/**
@@ -44,14 +45,28 @@ public class NaiveKNN implements Predictor {
 	
 	public NaiveKNN(File indexFile) throws Exception {
 		_indexFile = indexFile;
-		MovieID_Ratings testObject = new MovieID_Ratings(new LRUBuffer(5, 4096), indexFile.getAbsolutePath(), 0);
 		
+		System.out.println("Opening the index file ...");
+		MovieID_Ratings testObject = new MovieID_Ratings(new LRUBuffer(5, 4096), indexFile.getAbsolutePath(), 0);
+		System.out.println(" done.");
+		averageRatingTable.add(-1f); // pad the rating table with an invalid value in position zero so we can look up by movieID
 		int movieID = 1; // TODO: use the total later for iterating/sorting
-		for(;; movieID++){
+		for(; movieID < LIMIT; movieID++){ // TODO, take off limit
+			System.out.println("Populating distance table for movie " +  movieID);
 			ArrayList<UserRating> ratings = testObject.getRatingsById(movieID);
 			if(ratings == null){
 				break;
 			}
+			
+			// populate average rating table
+			float sum = 0.0f;
+			for(UserRating r: ratings) {
+				sum += r.rating;
+			}
+			assert(ratings.size() > 0);
+			float avg = sum / ratings.size();
+			averageRatingTable.add(avg);
+			
 			
 			// user ratings from movie A
 			HashMap<Integer, Byte> aRatings = new HashMap<Integer, Byte>();
@@ -60,8 +75,10 @@ public class NaiveKNN implements Predictor {
 				aRatings.put(r.userId, r.rating);
 			}
 			
- 			for(int otherMovieID = movieID + 1;; otherMovieID++) {
+ 			for(int otherMovieID = movieID + 1; otherMovieID < LIMIT; otherMovieID++) {
 				ArrayList<UserRating> otherRatings = testObject.getRatingsById(otherMovieID);
+				
+				System.out.println("Comparing movie " + movieID + " to movie " + otherMovieID);
 				
 				if(otherRatings == null) {
 					break;
@@ -71,7 +88,7 @@ public class NaiveKNN implements Predictor {
 				
 				HashMap<Integer, Byte> bRatings = new HashMap<Integer, Byte>();
 				
-				// now comparing one movie's set of ratings with another's
+				// now comparing one movie's set of ratings w2.7394366, 3.ith another's
 				for(UserRating r : otherRatings) {
 					bRatings.put(r.userId, r.rating);
 				}
@@ -85,27 +102,31 @@ public class NaiveKNN implements Predictor {
 						squareDiff = squareDiff * squareDiff;
 						ratingTotal += squareDiff;
 						++ratingCounter;
+						//System.exit(1);
 					}
 				}
-				
-				double distance = ratingTotal;
+				float distance = ratingTotal;
 				if(ratingCounter > 0) {
-					distance = (double) ratingTotal / ratingCounter;
+					distance = (float) ratingTotal / ratingCounter;
 					distanceTable.put(movieID, otherMovieID, distance);
 				}
 				else { // there were no users who rated both movies
-					distanceTable.put(movieID, otherMovieID, Double.MAX_VALUE);
+					distanceTable.put(movieID, otherMovieID, Float.MAX_VALUE);
 				}
 			}
 		}
 		
 		movieIDLimit = movieID;
 		
-		// System.out.println("Done with the index file, closing ...");
-		// testObject.close();
+		//System.out.println("Done with the index file, closing ...");
+		//testObject.close();
 
 		//DEBUG
+		
 		System.out.println(distanceTable);
+		System.out.println("done printing distance table.");
+		System.out.println(averageRatingTable);
+		System.out.println("done printing average rating table.");
 	
 	}
 	
@@ -114,14 +135,13 @@ public class NaiveKNN implements Predictor {
 	}
 	
 	/**
-	 * TODO: THIS IS BROKEN!!!
 	 * @param k how many nearest neighbors
 	 * @param movieId for this movie
 	 * @param distances the table of precomputed distances
 	 * @return
 	 */
 	public List<Neighbor> nearestNeighbors(int k, int movieId, DistanceTable distances) {
-		ArrayList<Neighbor> neighbors = new ArrayList<Neighbor>(movieIDLimit - 1);
+		List<Neighbor> neighbors = new ArrayList<Neighbor>(movieIDLimit - 1);
 		
 		for(int neighborId : distances.getMovieIds()) {
 			if(neighborId != movieId) {
@@ -150,12 +170,15 @@ public class NaiveKNN implements Predictor {
 		assert(_indexFile != null);
 		int k = 5;
 		List<Neighbor> nearestNeighbors = nearestNeighbors(k, movieId);
-		int sum = 0;
-		// TODO: would be nice to be able to iterate through ratings in index instead of having to load index
-		// and retrieve them one by one
+		float sum = 0;
+		
+		//System.out.println("Nearest neighbors for " + movieId + ":" );
+		
+			
 		for(Neighbor neighbor: nearestNeighbors) {
-			MovieRatings neighborRatings = new MovieRatings(neighbor.id, _indexFile);
-			sum += neighborRatings.averageRating();
+			float neighborAvg = averageRatingTable.get(neighbor.id);
+			//System.out.println("\tdistance for neighbor " + neighbor.id + ": " + neighbor.distance);
+			sum += neighborAvg;
 		}
 		
 		k = nearestNeighbors.size();
@@ -165,7 +188,7 @@ public class NaiveKNN implements Predictor {
 			return 0.0f;
 		}
 		assert(k > 0);
-		float averageRating = (float) sum / k;
+		float averageRating = sum / k;
 		
 		return averageRating;
 	}
@@ -193,10 +216,10 @@ public class NaiveKNN implements Predictor {
 	
 	protected static class DistanceTable {
 		
-		private Hashtable<String, Double> table = new Hashtable<String, Double>();
+		private Hashtable<String, Float> table = new Hashtable<String, Float>();
 		private final Set<Integer> movieIds = new HashSet<Integer>();
 		
-		public void put(int a, int b, double distance) {
+		public void put(int a, int b, float distance) {
 			if(a > b) {
 				table.put(new Pair(b, a).toString(), distance);
 			} else {
@@ -211,13 +234,13 @@ public class NaiveKNN implements Predictor {
 			return movieIds;
 		}
 		
-		public double get(int a, int b) {
+		public float get(int a, int b) {
 			int A = Math.min(a, b);
 			int B = Math.max(a, b);
 			
-			Double distance = table.get(new Pair(A, B).toString());
+			Float distance = table.get(new Pair(A, B).toString());
 			if(distance == null) {
-				throw new IllegalArgumentException("No distance found for " + a + " and " + b);
+				return Float.MAX_VALUE;
 			} else {
 				return distance;
 			}
@@ -226,26 +249,38 @@ public class NaiveKNN implements Predictor {
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 			sb.append("Distance table:\n");
-			for(Entry<String, Double> entry: table.entrySet()) {
+			
+			for(Entry<String, Float> entry: table.entrySet()) {
 				sb.append(entry.getKey());
 				sb.append(" distance: ");
 				sb.append(entry.getValue());
 				sb.append("\n");
 			}
+			/*
+			for(int i=1; i <= LIMIT; i++) {
+				for(int j=i+1; j <= LIMIT; j++) {
+					sb.append("(" + i + "," + j + ")");
+					sb.append(" distance: " + this.get(i, j) + "\n");
+				}
+			}
+			*/
 			return sb.toString();
 		}
 	}
 	
 	public static void main(String[] args) throws Exception {
-		File inputData = new File("fake_data");
-		File indexFile = new File("fake_data.neu");
-		File outputFile = new File("knn_fake_results.txt");
-		File qualifyingSet = new File("fake_qualifying.txt");
+		//File inputData = new File("fake_data");
+		File workingDir = new File("/vm/");
+		File indexFile = new File(workingDir, "tortuga/training_set_indexed2.neu");
+		File outputFile = new File(workingDir, "naiveknn_results.txt");
+		File qualifyingSet = new File(workingDir, "tortuga/download/qualifying.txt");
 		
-		RatingStore database = new RatingStore(indexFile);
-		database.createFromFile(inputData);
+		//RatingStore database = new RatingStore(indexFile);
+		//database.createFromFile(inputData);
 		
 		Predictor predictor = new NaiveKNN(indexFile);
+		System.out.println("Done making NaiveKNN");
+		System.out.println("Writing out predictions to " + outputFile);
 		PredictionIO predictionIO = new PredictionIO(qualifyingSet, outputFile, predictor);
 		
 		predictionIO.run();

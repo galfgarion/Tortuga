@@ -50,13 +50,13 @@ public class NaiveKNNTest extends junit.framework.TestCase {
 					distances.put(i, i, 0);
 				}
 				else {
-					distances.put(i, j, Double.MAX_VALUE);
+					distances.put(i, j, Float.MAX_VALUE);
 				}
 			}
 		}
 		
-		distances.put(1, 5, 1.0);
-		distances.put(1, 2, 2.0);
+		distances.put(1, 5, 1.0f);
+		distances.put(1, 2, 2.0f);
 		
 		List<Neighbor> nearest = knn.nearestNeighbors(2, 1, distances);
 		
@@ -91,10 +91,10 @@ public class NaiveKNNTest extends junit.framework.TestCase {
 
 		knn.nearestNeighbors(2, 1);
 		
-		assertEquals(1.0, knn.distanceTable.get(1, 2));
-		assertEquals(1.0, knn.distanceTable.get(2, 1));
-		assertEquals(4.0, knn.distanceTable.get(1, 3));
-		assertEquals(1.0, knn.distanceTable.get(2, 3));
+		assertEquals(1.0f, knn.distanceTable.get(1, 2));
+		assertEquals(1.0f, knn.distanceTable.get(2, 1));
+		assertEquals(4.0f, knn.distanceTable.get(1, 3));
+		assertEquals(1.0f, knn.distanceTable.get(2, 3));
 	}
 	
 	public void testCreateFullDataIndex() throws Exception {

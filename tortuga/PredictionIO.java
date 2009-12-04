@@ -11,15 +11,18 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import knn.NaiveKNN;
+
 import movieRatings.MovieRatings;
 
 public class PredictionIO {
+	
+	static int LIMIT = NaiveKNN.LIMIT;
 	
 	final File _qualifyingSet;
 	final File _outputFile;
 	private PrintStream _printStream;
 	final Predictor _predictor;
-	
 	
 	public PredictionIO(File qualifyingSet, File outputFile, Predictor predictor) {
 		_qualifyingSet = qualifyingSet;
@@ -55,6 +58,7 @@ public class PredictionIO {
 		Pattern idPattern = MovieRatings.idPattern;
 		
 		int userID, movieID = 0, linecounter = 0;
+		boolean skip = false;
 		
 		while(scanner.hasNextLine()) {
 			linecounter ++;
@@ -65,20 +69,32 @@ public class PredictionIO {
 			
 			if(movieIdMatcher.matches()) {
 				movieID = Integer.parseInt(movieIdMatcher.group(1));
+				
+				if(movieID > LIMIT) {
+					skip = true;
+					continue;
+				}
+				skip = false;
 				printMovieID(movieID);
 			}
 			else if(ratingMatcher.matches()) {
+				if(skip) continue;
+				
 				assert(movieID > 0);
+				
 				userID = Integer.parseInt(ratingMatcher.group(1));
-				printRating(_predictor.predictRating(movieID, userID));
+				float prediction = _predictor.predictRating(movieID, userID);
+				//System.out.println(prediction);
+				printRating(prediction);
 			}
 			else {
 				// reached the end of valid input
 				// the input may be bad
-				String errorMessage = "Invalid input file, expected a movieID or rating at line " +
+				String errorMessage = "Invalid input file " + _qualifyingSet + ", expected a movieID or rating at line " +
 						linecounter + ", but input was: " + inputLine;
 				System.err.println(errorMessage);
 			}
+		
 		}
 	}
 	
