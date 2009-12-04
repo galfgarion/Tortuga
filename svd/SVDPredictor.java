@@ -1,7 +1,5 @@
 package svd;
 
-import java.io.File;
-
 import tortuga.Predictor;
 
 import java.io.*;
@@ -16,7 +14,7 @@ public class SVDPredictor implements Predictor{
 	private int k;
 	private DoubleMatrix2D svdRecon;
 	
-	public SVDPredictor(File index, String svdFile, int reduce) throws IOException, ClassNotFoundException {
+	public SVDPredictor(File index, String svdFile, int reduce) throws Exception {
 		try{
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(svdFile));
 			svd = (SingularValueDecomposition)ois.readObject();
@@ -51,4 +49,13 @@ public class SVDPredictor implements Predictor{
 	public float predictRating(int movieID, int userID){
 		return (float)svdRecon.get(movieID, userID);
 	}
+	
+	/*
+	public static void main(String[] args){
+		File theIndex = new File(args[0]);
+		String svdFile = args[1];
+		
+		SVDPredictor(theIndex, svdFile, Integer.parseInt(args[2]));
+	}
+	*/
 }
