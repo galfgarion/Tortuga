@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Scanner;
 
 import neustore.base.*;
@@ -34,6 +35,9 @@ public class MovieID_Ratings extends DBIndex {
 	private MovieID_RatingsPage lastPage;
 	
 	private ArrayList<IDLookup> IDLookups;
+	private HashMap<Integer, ArrayList<UserRating>> wug;
+	
+	private final boolean bufferLocalData = false;
 	
 	public MovieID_Ratings(DBBuffer _buffer, String filename, int isCreate) throws IOException {
 		super(_buffer, filename, isCreate);
@@ -47,6 +51,8 @@ public class MovieID_Ratings extends DBIndex {
 		}
 		else
 			lastPage = myReadPage(lastPageID);
+		
+		wug = new HashMap<Integer, ArrayList<UserRating>>();
 	}
 	
 	protected void initIndexHead() {
@@ -144,6 +150,9 @@ public class MovieID_Ratings extends DBIndex {
 	
 	public ArrayList<UserRating> getRatingsById (int TargetNodeId)
 	{
+		if(bufferLocalData)
+			if(wug.containsKey(Integer.valueOf(TargetNodeId)))
+				return wug.get(Integer.valueOf(TargetNodeId));
 		ArrayList<UserRating> returnRecord = new ArrayList<UserRating>(), ratingsToAdd;
 		
 		int startingPage = Collections.binarySearch(IDLookups, new IDLookup(TargetNodeId, 0));
@@ -155,8 +164,13 @@ public class MovieID_Ratings extends DBIndex {
 				/* check all of this logic after doing the indexing stuff to make sure it's still necessary */
 				MovieID_RatingsPage currentPage = myReadPage(currentPageID);
 				ratingsToAdd = currentPage.getRatingsById(TargetNodeId);
-				if(returnRecord.size() > 0 && ratingsToAdd == null)
+				if(returnRecord.size() > 0 && ratingsToAdd == null) {
+					if(bufferLocalData) {
+						wug.put(Integer.valueOf(TargetNodeId), returnRecord);
+						// System.out.println("added " + TargetNodeId + " to hashmap");
+					}
 					return returnRecord;
+				}
 				else if(ratingsToAdd != null)
 					returnRecord.addAll(ratingsToAdd);
 			}
