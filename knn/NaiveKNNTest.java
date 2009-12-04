@@ -15,7 +15,7 @@ public class NaiveKNNTest extends junit.framework.TestCase {
 	public static void main(String argv[]) {
 		try {
 			Thread.currentThread().sleep(45000);
-			testLoadFullDataIndex();
+			testLoadFullMovieDataIndex();
 		} catch (Exception e) {
 			
 		}
@@ -50,13 +50,13 @@ public class NaiveKNNTest extends junit.framework.TestCase {
 					distances.put(i, i, 0);
 				}
 				else {
-					distances.put(i, j, Double.MAX_VALUE);
+					distances.put(i, j, Float.MAX_VALUE);
 				}
 			}
 		}
 		
-		distances.put(1, 5, 1.0);
-		distances.put(1, 2, 2.0);
+		distances.put(1, 5, 1.0f);
+		distances.put(1, 2, 2.0f);
 		
 		List<Neighbor> nearest = knn.nearestNeighbors(2, 1, distances);
 		
@@ -91,22 +91,28 @@ public class NaiveKNNTest extends junit.framework.TestCase {
 
 		knn.nearestNeighbors(2, 1);
 		
-		assertEquals(1.0, knn.distanceTable.get(1, 2));
-		assertEquals(1.0, knn.distanceTable.get(2, 1));
-		assertEquals(4.0, knn.distanceTable.get(1, 3));
-		assertEquals(1.0, knn.distanceTable.get(2, 3));
+		assertEquals(1.0f, knn.distanceTable.get(1, 2));
+		assertEquals(1.0f, knn.distanceTable.get(2, 1));
+		assertEquals(4.0f, knn.distanceTable.get(1, 3));
+		assertEquals(1.0f, knn.distanceTable.get(2, 3));
 	}
 	
 	public void testCreateFullDataIndex() throws Exception {
-		File indexFile = new File("/tmp/training_set_indexed2.neu");
+		File indexFile = new File("/tmp/training_set_indexed3.neu");
 		RatingStore database = new RatingStore(indexFile);
 		database.createFromFile(new File("training_set"));
 	}
 	
-	public static void testLoadFullDataIndex() throws Exception {
+	public static void testLoadFullMovieDataIndex() throws Exception {
 		MovieID_Ratings index;
 		index = new MovieID_Ratings(new LRUBuffer (1, 4096), "/tmp/training_set_indexed2.neu", 0);
 		long what = System.currentTimeMillis();
+		for(int x = 1; x < 17770; x++)
+			index.getRatingsById(x);
+		System.out.println(index.getRatingsById(17770));
+		System.out.println("MS elapsed during search: " + (System.currentTimeMillis() - what));
+		
+		what = System.currentTimeMillis();
 		for(int x = 1; x < 17770; x++)
 			index.getRatingsById(x);
 		System.out.println(index.getRatingsById(17770));

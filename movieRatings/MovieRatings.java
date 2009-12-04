@@ -7,6 +7,8 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,12 +16,15 @@ import neustore.base.LRUBuffer;
 
 import database.RatingStore;
 
+import userRatings.MovieRating;
+import userRatings.UserRatings;
 
 public class MovieRatings implements Iterable<UserRating>{
 	
+	public static SortedSet<UserRatings> ALL_USER_RATINGS = new TreeSet<UserRatings>();
+	
 	private int _movieID;
 	protected final ArrayList<UserRating> _userRatings = new ArrayList<UserRating>();
-	UserRating[] userRatings;
 	public static Pattern ratingPattern = Pattern.compile("(\\d+),(\\d),(\\d{4}-\\d{2}-\\d{2})");
 	public static Pattern idPattern = Pattern.compile("^\\s*(\\d+):\\s*$");
 	
@@ -88,7 +93,9 @@ public class MovieRatings implements Iterable<UserRating>{
 			scanner.useDelimiter(":");
 			_movieID = scanner.nextInt();
 			
-			
+			MovieRating m;
+			UserRatings u;
+			boolean createUserIndex = true;
 			while(scanner.hasNextLine()) {
 				String line = scanner.nextLine();
 				Matcher matcher = ratingPattern.matcher(line);
@@ -98,6 +105,12 @@ public class MovieRatings implements Iterable<UserRating>{
 					String date = matcher.group(3);
 					
 					_userRatings.add(new UserRating(userId, rating /*, date*/));
+					
+					if(createUserIndex) {
+						u = new UserRatings(userId);
+						ALL_USER_RATINGS.add(u); /* this fails by returning boolean when u is already a member. that's okay! */
+						ALL_USER_RATINGS.subSet(u, new UserRatings(userId+1)).first();
+					}
 				} else {
 					// TODO: log a warning or throw an exception
 				}

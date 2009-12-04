@@ -7,9 +7,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import movieRatings.*;
-
-import MovieID_RatingsIndex.AttributeRecord;
+import userRatings.MovieRating;
+import movieRatings.UserRating;
 
 
 /**
@@ -141,23 +140,9 @@ public class ByteArray {
 		// writeInt (r.date);
 	}
 	
-	public void writeAttributeRecord(AttributeRecord record) throws IOException {
-		if(record.attName.length() >= 64)
-			record.attName = record.attName.substring(0, 64);
-		while(record.attName.length() < 64)
-			record.attName += " ";
-		writeString (record.attName);
-		record.attName = record.attName.trim();
-		
-		if(record.attValue.length() > 128)
-			record.attValue = record.attValue.substring(0, 128);
-		while(record.attValue.length() < 128)
-			record.attValue += " ";
-		writeString (record.attValue);
-		record.attValue = record.attValue.trim();
-		
-		writeInt (record.nodeID);
-		
+	public void writeRating ( MovieRating r ) throws IOException {
+		writeInt (r.movieId);
+		writeByte (r.rating);
 	}
 	
 	/**
@@ -175,10 +160,8 @@ public class ByteArray {
 			destinationArray.add(new UserRating(in.readInt(), readByte()));
 	}
 	
-	public AttributeRecord readAttributeRecord () throws IOException {
-		String attName = readString(64).trim();
-		String attValue = readString(128).trim();
-		int nodeId = readInt();
-		return new AttributeRecord(nodeId, attName, attValue);
+	public void readAllUserRatings(ArrayList<MovieRating> destinationArray, int numRatings) throws IOException {
+		for(int x = 0; x < numRatings; x++)
+			destinationArray.add(new MovieRating(in.readInt(), readByte()));
 	}
 }
