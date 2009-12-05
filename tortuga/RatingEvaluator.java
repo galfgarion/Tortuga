@@ -96,7 +96,7 @@ public class RatingEvaluator {
 	}
 	
 
-	private static class FakeUserRating extends UserRating implements Comparable<FakeUserRating> {
+	private static class FakeUserRating extends UserRating {
 		public FakeUserRating(int userId, byte rating/*, int date*/) {
 			super(userId, rating /*, date*/);
 		}
@@ -104,10 +104,6 @@ public class RatingEvaluator {
 		@Override
 		public boolean equals(Object o) {
 			return userId == ((FakeUserRating)o).userId;
-		}
-		
-		public int compareTo(FakeUserRating other) {
-			return this.userId - other.userId;
 		}
 	}
 	
