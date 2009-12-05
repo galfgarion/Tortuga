@@ -26,7 +26,9 @@ import movieRatings.UserRating;
 public class RowiseKNN {
 	
 	//private boolean _isDistanceTableComputed = false;
-	private static final int MAX_MOVIE_ID = 100;
+	
+	// 1000:  7m21s to compute distance table
+	private static final int MAX_MOVIE_ID = 1000;
 	
 	private static final int THRESHOLD = 10;
 	
@@ -95,15 +97,21 @@ public class RowiseKNN {
 		
 		// PRECONDITION the ratings are sorted ascending by userId
 		
-		for(UserRating rating : first) {
-			for(UserRating potentialMatch : second) {
-				if(rating.userId < potentialMatch.userId) {
+		int secondPos = 0;
+		for(int firstPos = 0; firstPos < first.size(); firstPos ++) {
+			UserRating firstRating, secondRating;
+			firstRating = first.get(firstPos);
+			
+			for(; secondPos < second.size(); secondPos ++) {
+				secondRating = second.get(secondPos);
+				
+				if(firstRating.userId < secondRating.userId) {
 					break;
-				} else if(rating.userId == potentialMatch.userId) {
+				} else if(firstRating.userId == secondRating.userId) {
 					// if the movies were rated by the same user, they are a match
 					// then do the calculation
 					matchCount ++;
-					int diff = rating.rating - potentialMatch.rating;
+					int diff = firstRating.rating - secondRating.rating;
 					int squareDiff = diff * diff;
 					diffTotal += squareDiff;
 				}
