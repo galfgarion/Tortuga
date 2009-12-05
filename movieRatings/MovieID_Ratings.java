@@ -35,7 +35,7 @@ public class MovieID_Ratings extends DBIndex {
 	private MovieID_RatingsPage lastPage;
 	
 	private ArrayList<IDLookup> IDLookups;
-	private HashMap<Integer, ArrayList<UserRating>> wug;
+	private HashMap<Integer, EfficientMovieRatings> wug;
 	
 	private final boolean bufferLocalData = false;
 	
@@ -52,7 +52,7 @@ public class MovieID_Ratings extends DBIndex {
 		else
 			lastPage = myReadPage(lastPageID);
 		
-		wug = new HashMap<Integer, ArrayList<UserRating>>();
+		wug = new HashMap<Integer, EfficientMovieRatings>();
 	}
 	
 	protected void initIndexHead() {
@@ -132,6 +132,7 @@ public class MovieID_Ratings extends DBIndex {
 		 * we need to handle right here */
 
 		int firstPageID = -1; // used to track where the ratings for this movie begin
+		Collections.sort(key._userRatings);
 		
 		while(key.getUserRatings().size() > 0) {
 			lastPageID = allocate();
@@ -148,12 +149,13 @@ public class MovieID_Ratings extends DBIndex {
 		return lastPageID;
 	}
 	
-	public ArrayList<UserRating> getRatingsById (int TargetNodeId)
+	public EfficientMovieRatings getRatingsById (int TargetNodeId)
 	{
-		if(bufferLocalData)
-			if(wug.containsKey(Integer.valueOf(TargetNodeId)))
-				return wug.get(Integer.valueOf(TargetNodeId));
+		if(wug.containsKey(Integer.valueOf(TargetNodeId)))
+			return wug.get(Integer.valueOf(TargetNodeId));
+
 		ArrayList<UserRating> returnRecord = new ArrayList<UserRating>(), ratingsToAdd;
+		EfficientMovieRatings efficient;
 		
 		int startingPage = Collections.binarySearch(IDLookups, new IDLookup(TargetNodeId, 0));
 		if(startingPage < 0) /* Movie was not found in our database */
@@ -165,11 +167,9 @@ public class MovieID_Ratings extends DBIndex {
 				MovieID_RatingsPage currentPage = myReadPage(currentPageID);
 				ratingsToAdd = currentPage.getRatingsById(TargetNodeId);
 				if(returnRecord.size() > 0 && ratingsToAdd == null) {
-					if(bufferLocalData) {
-						wug.put(Integer.valueOf(TargetNodeId), returnRecord);
-						// System.out.println("added " + TargetNodeId + " to hashmap");
-					}
-					return returnRecord;
+					efficient = new EfficientMovieRatings(TargetNodeId, returnRecord);
+					wug.put(Integer.valueOf(TargetNodeId), efficient);
+					return efficient;
 				}
 				else if(ratingsToAdd != null)
 					returnRecord.addAll(ratingsToAdd);
@@ -181,7 +181,7 @@ public class MovieID_Ratings extends DBIndex {
 		
 		/* again, most of this check at the end should be obsoleted by the IDLookups array if all is functioning well */
 		// if(returnRecord.size() > 0)
-		return returnRecord;
+		return null;
 	}
 	
     public int numPages() {

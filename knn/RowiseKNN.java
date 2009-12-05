@@ -3,9 +3,7 @@ package knn;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import neustore.base.LRUBuffer;
@@ -43,10 +41,10 @@ public class RowiseKNN {
 		ratingsIndex = new MovieID_Ratings(new LRUBuffer(5, 4096), indexFile.getAbsolutePath(), 0);
 		System.out.println("done.");
 		System.out.println("Loading movie ratings ...");
-		loadMovieRatings();
+		// loadMovieRatings();
 		System.out.println("done.");
 		System.out.println("Sorting movie ratings ...");
-		sortMovieRatings();
+		// sortMovieRatings();
 		System.out.println("done.");
 		System.out.println("Building distances table for " + MAX_MOVIE_ID + " movies ...");
 		computeMovieDistances(ratingsIndex, MAX_MOVIE_ID);
@@ -65,21 +63,21 @@ public class RowiseKNN {
 	/**
 	 * Load all the movie ratings into memory
 	 */
-	private void loadMovieRatings() {
+	/* private void loadMovieRatings() {
 		
 		movieRatings.add(0, null);
 		
 		for(int movieId = 1; movieId <= MAX_MOVIE_ID; movieId++) {
 			movieRatings.add(movieId, ratingsIndex.getRatingsById(movieId));
 		}
-	}
+	} */
 	
 	/**
 	 * Sort individual movie ratings by user id
 	 */
 	private void sortMovieRatings() {
 		for(int movieId = 1; movieId <= MAX_MOVIE_ID; movieId++) {
-			Collections.sort(movieRatings.get(movieId), UserRating.CompareByUserId);
+			Collections.sort(movieRatings.get(movieId));
 		}
 	}
 	

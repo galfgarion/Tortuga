@@ -1,5 +1,6 @@
 package svd;
 
+import movieRatings.EfficientMovieRatings;
 import movieRatings.MovieID_Ratings;
 import movieRatings.UserRating;
 import neustore.base.LRUBuffer;
@@ -28,12 +29,12 @@ public class SVDBuilder {
 		SparseDoubleMatrix2D svdbuild = new SparseDoubleMatrix2D(rows, cols);
 		
 		MovieID_Ratings theRatings = new MovieID_Ratings(new LRUBuffer(5, 4096), index.getAbsolutePath(), 0);
-		ArrayList<UserRating> ratings;
+		EfficientMovieRatings ratings;
 		
 		for(int row=0; row<rows; ++row) {
 			ratings = theRatings.getRatingsById(row+1);
-			for(UserRating r : ratings) {
-				svdbuild.setQuick(row,r.userId, r.rating);
+			for(int x = 0; x < ratings.numRatingsStored; x++) {
+				svdbuild.setQuick(row, ratings.UserID[x], ratings.Rating[x]);
 			}
 		}
 		

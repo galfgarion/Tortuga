@@ -13,6 +13,7 @@ import neustore.base.ByteArray;
  * @author Donghui Zhang &lt;donghui@ccs.neu.edu&gt;
  */
 public class MovieID_RatingsPage extends DBPage {
+	public EfficientMovieRatings EfficientRatings;
 	public MovieRatings MovieAndRatings;
 	
 	public MovieID_RatingsPage( int _pageSize ) {

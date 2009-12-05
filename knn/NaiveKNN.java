@@ -15,6 +15,7 @@ import java.util.Map.Entry;
 import tortuga.PredictionIO;
 import tortuga.Predictor;
 
+import movieRatings.EfficientMovieRatings;
 import movieRatings.MovieID_Ratings;
 import movieRatings.UserRating;
 import neustore.base.LRUBuffer;
@@ -22,7 +23,7 @@ import neustore.base.LRUBuffer;
 public class NaiveKNN implements Predictor {
 	
 	// 100: 0m42s
-	public final static int LIMIT = 100;
+	public final static int LIMIT = 1000;
 	protected int movieIDLimit;
 	protected DistanceTable distanceTable = new DistanceTable();
 	protected final ArrayList<Float> averageRatingTable = new ArrayList<Float>(LIMIT + 1);
@@ -53,58 +54,47 @@ public class NaiveKNN implements Predictor {
 		int movieID = 1; // TODO: use the total later for iterating/sorting
 		for(; movieID < LIMIT; movieID++){ // TODO, take off limit
 			System.out.println("Populating distance table for movie " +  movieID);
-			ArrayList<UserRating> ratings = testObject.getRatingsById(movieID);
+			EfficientMovieRatings ratings = testObject.getRatingsById(movieID);
 			if(ratings == null){
 				break;
 			}
 			
 			// populate average rating table
 			float sum = 0.0f;
-			for(UserRating r: ratings) {
-				sum += r.rating;
+			for(byte r : ratings.Rating) {
+				sum += r;
 			}
-			assert(ratings.size() > 0);
-			float avg = sum / ratings.size();
+			assert(ratings.numRatingsStored > 0);
+			float avg = sum / ratings.numRatingsStored;
 			averageRatingTable.add(avg);
 			
-			
-			// user ratings from movie A
-			HashMap<Integer, Byte> aRatings = new HashMap<Integer, Byte>();
-			
-			for(UserRating r: ratings) {
-				aRatings.put(r.userId, r.rating);
-			}
-			
  			for(int otherMovieID = movieID + 1; otherMovieID < LIMIT; otherMovieID++) {
-				ArrayList<UserRating> otherRatings = testObject.getRatingsById(otherMovieID);
+				EfficientMovieRatings otherRatings = testObject.getRatingsById(otherMovieID);
 				
-				System.out.println("Comparing movie " + movieID + " to movie " + otherMovieID);
+				// System.out.println("Comparing movie " + movieID + " to movie " + otherMovieID);
 				
 				if(otherRatings == null) {
 					break;
 				}
 				
-				// System.out.println("otherRatings.size(): " + otherRatings.size());
-				
-				HashMap<Integer, Byte> bRatings = new HashMap<Integer, Byte>();
-				
-				// now comparing one movie's set of ratings w2.7394366, 3.ith another's
-				for(UserRating r : otherRatings) {
-					bRatings.put(r.userId, r.rating);
-				}
-				
 				int ratingTotal = 0;
 				int ratingCounter = 0;
 				
-				for(Map.Entry<Integer, Byte> entry : aRatings.entrySet()){
-					if(bRatings.containsKey(entry.getKey()) ) {
-						int squareDiff = entry.getValue() - bRatings.get(entry.getKey());
-						squareDiff = squareDiff * squareDiff;
-						ratingTotal += squareDiff;
-						++ratingCounter;
-						//System.exit(1);
+				int y = 0;
+				int squareDiff;
+				for(int x = 0; x < ratings.numRatingsStored; x++)
+					for(; y < otherRatings.numRatingsStored; y++) {
+						if(ratings.UserID[x] == otherRatings.UserID[y]) {
+							squareDiff = ratings.Rating[x] - otherRatings.Rating[y];
+							squareDiff = squareDiff * squareDiff;
+							ratingTotal += squareDiff;
+							++ratingCounter;
+							++y;
+							break;
+						} else if (ratings.UserID[x] < otherRatings.UserID[y])
+							break;
 					}
-				}
+				
 				float distance = ratingTotal;
 				if(ratingCounter > 0) {
 					distance = (float) ratingTotal / ratingCounter;
@@ -270,18 +260,20 @@ public class NaiveKNN implements Predictor {
 	
 	public static void main(String[] args) throws Exception {
 		//File inputData = new File("fake_data");
-		File workingDir = new File("/vm/");
-		File indexFile = new File(workingDir, "tortuga/training_set_indexed2.neu");
+		File workingDir = new File("/tmp/");
+		File indexFile = new File(workingDir, "training_set_indexed3.neu");
 		File outputFile = new File(workingDir, "naiveknn_results.txt");
 		File qualifyingSet = new File(workingDir, "tortuga/download/qualifying.txt");
 		
 		//RatingStore database = new RatingStore(indexFile);
 		//database.createFromFile(inputData);
 		
+		long time = System.currentTimeMillis();
 		Predictor predictor = new NaiveKNN(indexFile);
 		System.out.println("Done making NaiveKNN");
 		System.out.println("Writing out predictions to " + outputFile);
 		PredictionIO predictionIO = new PredictionIO(qualifyingSet, outputFile, predictor);
+		System.out.println("Total execution time: " + (System.currentTimeMillis() - time) + " ms");
 		
 		predictionIO.run();
 	}
