@@ -20,9 +20,10 @@ public class SVDBuilder {
 	 */
 	private int rows = 480000;
 	private int cols = 17770;
+	private SingularValueDecomposition svdTab;
 		
 	//public SVDBuilder(String neustoreTrainingSetFile) {
-	public SVDBuilder(File index, String outputFile) throws Exception {
+	public SVDBuilder(File index, String output) throws Exception {
 		
 		SparseDoubleMatrix2D svdbuild = new SparseDoubleMatrix2D(rows, cols);
 		
@@ -38,15 +39,15 @@ public class SVDBuilder {
 		
 		svdbuild.trimToSize();
 		
-		SingularValueDecomposition svdTab = new SingularValueDecomposition(svdbuild);
+		svdTab = new SingularValueDecomposition(svdbuild);
 		
 		try {
-			ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(outputFile));
+			ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(output));
 			os.writeObject(svdTab);
 			os.close();
 		}
 		catch (IOException e) {
-			System.out.println("Unable to open filename " + outputFile + " :" + e.getMessage());
+			System.out.println("Unable to open filename " + output + " :" + e.getMessage());
 		}
 	}
 }
