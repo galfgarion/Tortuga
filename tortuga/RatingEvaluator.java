@@ -24,6 +24,10 @@ public class RatingEvaluator {
 	private static final int QUIZ_OR_TEST_POSITION = 2;
 	//private static final boolean USE_QUIZ_AND_TEST_DATA = true;
 
+	public static double rootMeanSquaredError(File qualifying, File judging) throws IOException {
+		return rootMeanSquaredError(qualifying, judging, QUIZ);
+	}
+	
 	public static double rootMeanSquaredError(File qualifying, File judging, char quizOrTest) throws IOException {
 		
 		Scanner qScanner = new Scanner(new FileInputStream(qualifying));

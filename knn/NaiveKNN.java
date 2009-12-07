@@ -43,7 +43,7 @@ public class NaiveKNN implements Predictor {
 		averageRatingTable.add(-1f); // pad the rating table with an invalid value in position zero so we can look up by movieID
 		int movieID = 1; // TODO: use the total later for iterating/sorting
 		EfficientMovieRatings ratings, otherRatings;
-		ArrayList<Similarity> similarityScores = new ArrayList<Similarity>();
+		List<Similarity> similarityScores = new ArrayList<Similarity>();
 		
 		for(; movieID < LIMIT; movieID++){ // TODO, take off limit
 			// System.out.println("Populating distance table for movie " +  movieID);
@@ -102,7 +102,7 @@ public class NaiveKNN implements Predictor {
 			}
  			
  			Collections.sort(similarityScores);
- 			similarityScores.subList(0, K);
+ 			similarityScores = similarityScores.subList(0, K);
  			System.out.println(similarityScores);
 		}
 		
