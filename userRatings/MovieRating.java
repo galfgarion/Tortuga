@@ -6,27 +6,27 @@ package userRatings;
 public class MovieRating implements Comparable<MovieRating> {
 	
 	public MovieRating(int userId, byte rating/*, String date*/) {
-		this.userId = userId;
+		this.movieId = userId;
 		this.rating = rating;
 		// TODO: this is probably not what we want
 		/* this.date = 0; //(int) Date.valueOf(date).getTime(); */
 	}
 	
 	public MovieRating(int userId, byte rating, int date) {
-		this.userId = userId;
+		this.movieId = userId;
 		this.rating = rating;
 		/* this.date = date; */
 	}
 	
 	public String toString() {
-		return userId + "," + rating + ","/* + date*/;
+		return movieId + "," + rating + ","/* + date*/;
 	}
 	
 	public int compareTo(MovieRating o) {
-		return this.userId - o.userId;
+		return this.movieId - o.movieId;
 	}
 	
-	public final int userId;
+	public final int movieId;
 	public byte rating;
 	// public final int date;
 	

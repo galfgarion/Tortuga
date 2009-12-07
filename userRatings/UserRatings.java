@@ -157,18 +157,6 @@ public class UserRatings implements Iterable<MovieRating>{
 		return _userRatings;
 	}
 	
-	// return the user rating for user
-	// precondition: the rating exists in the list of user ratings
-	public MovieRating getRatingByUser(int userId) {
-		for(MovieRating rating : _userRatings) {
-			if(rating.userId == userId) {
-				return rating;
-			}
-		}
-		
-		throw new IllegalStateException("Precondition violated:  the user id " + " does not exist in the list of ratings");
-	}
-	
 	@Override
 	public Iterator<MovieRating> iterator() {
 		// TODO Auto-generated method stub

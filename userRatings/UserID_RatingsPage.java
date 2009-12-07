@@ -60,7 +60,7 @@ public class UserID_RatingsPage extends DBPage {
 		
 		MovieAndRatings = new UserRatings(MovieID);
 		MovieAndRatings._userRatings.ensureCapacity(numRecs);
-		ba.readAllMovieRatings(MovieAndRatings._userRatings, numRecs);
+		ba.readAllUserRatings(MovieAndRatings._userRatings, numRecs);
 	}
 	
 	protected void write( byte[] b ) throws IOException {
