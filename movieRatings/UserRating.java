@@ -1,7 +1,5 @@
 package movieRatings;
 
-import java.util.Comparator;
-
 /**
  *  Should be immutable
  */

@@ -8,11 +8,7 @@ import java.util.List;
 
 import neustore.base.LRUBuffer;
 
-import tortuga.PredictionIO;
-import tortuga.Predictor;
-
 import movieRatings.MovieID_Ratings;
-import movieRatings.MovieRatings;
 import movieRatings.UserRating;
 
 /**

@@ -3,29 +3,19 @@ package knn;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
-
-
 import tortuga.PredictionIO;
 import tortuga.Predictor;
 
 import movieRatings.EfficientMovieRatings;
 import movieRatings.MovieID_Ratings;
-import movieRatings.UserRating;
 import neustore.base.LRUBuffer;
 
 public class NaiveKNN implements Predictor {
 	
 	// 100: 0m42s
-	public final static int LIMIT = 1000;
+	public final static int LIMIT = 1000, K = 500;
 	protected int movieIDLimit;
-	protected DistanceTable distanceTable = new DistanceTable();
 	protected final ArrayList<Float> averageRatingTable = new ArrayList<Float>(LIMIT + 1);
 	private File _indexFile;
 	
@@ -52,9 +42,14 @@ public class NaiveKNN implements Predictor {
 		System.out.println(" done.");
 		averageRatingTable.add(-1f); // pad the rating table with an invalid value in position zero so we can look up by movieID
 		int movieID = 1; // TODO: use the total later for iterating/sorting
+		EfficientMovieRatings ratings, otherRatings;
+		ArrayList<Similarity> similarityScores = new ArrayList<Similarity>();
+		
 		for(; movieID < LIMIT; movieID++){ // TODO, take off limit
-			System.out.println("Populating distance table for movie " +  movieID);
-			EfficientMovieRatings ratings = testObject.getRatingsById(movieID);
+			// System.out.println("Populating distance table for movie " +  movieID);
+			similarityScores.clear();
+			ratings = testObject.getRatingsById(movieID);
+			
 			if(ratings == null){
 				break;
 			}
@@ -68,8 +63,10 @@ public class NaiveKNN implements Predictor {
 			float avg = sum / ratings.numRatingsStored;
 			averageRatingTable.add(avg);
 			
- 			for(int otherMovieID = movieID + 1; otherMovieID < LIMIT; otherMovieID++) {
-				EfficientMovieRatings otherRatings = testObject.getRatingsById(otherMovieID);
+ 			for(int otherMovieID = 1; otherMovieID < LIMIT; otherMovieID++) {
+ 				if(movieID == otherMovieID)
+ 					continue;
+				otherRatings = testObject.getRatingsById(otherMovieID);
 				
 				// System.out.println("Comparing movie " + movieID + " to movie " + otherMovieID);
 				
@@ -95,15 +92,18 @@ public class NaiveKNN implements Predictor {
 							break;
 					}
 				
-				float distance = ratingTotal;
+				float distance = (float) ratingTotal / ratingCounter;
 				if(ratingCounter > 0) {
-					distance = (float) ratingTotal / ratingCounter;
-					distanceTable.put(movieID, otherMovieID, distance);
+					similarityScores.add(new Similarity(otherMovieID, (distance+.05f) * (ratingCounter + 100) / ratingCounter));
 				}
-				else { // there were no users who rated both movies
-					distanceTable.put(movieID, otherMovieID, Float.MAX_VALUE);
-				}
+				else // not enough users rated both movies
+					continue;
+				
 			}
+ 			
+ 			Collections.sort(similarityScores);
+ 			similarityScores.subList(0, K);
+ 			System.out.println(similarityScores);
 		}
 		
 		movieIDLimit = movieID;
@@ -113,15 +113,10 @@ public class NaiveKNN implements Predictor {
 
 		//DEBUG
 		
-		System.out.println(distanceTable);
+		/* System.out.println(distanceTable);
 		System.out.println("done printing distance table.");
 		System.out.println(averageRatingTable);
-		System.out.println("done printing average rating table.");
-	
-	}
-	
-	public List<Neighbor> nearestNeighbors(int k, int movieId) {
-		return nearestNeighbors(k, movieId, distanceTable);
+		System.out.println("done printing average rating table."); */
 	}
 	
 	/**
@@ -130,24 +125,8 @@ public class NaiveKNN implements Predictor {
 	 * @param distances the table of precomputed distances
 	 * @return
 	 */
-	public List<Neighbor> nearestNeighbors(int k, int movieId, DistanceTable distances) {
-		List<Neighbor> neighbors = new ArrayList<Neighbor>(movieIDLimit - 1);
-		
-		for(int neighborId : distances.getMovieIds()) {
-			if(neighborId != movieId) {
-				neighbors.add(new Neighbor(neighborId, distances.get(movieId, neighborId)));
-			}
-		}
-		
-		Collections.sort(neighbors);
-		
-		if(neighbors.size() <= k) {
-			return neighbors;
-		}
-		
-		assert(neighbors.size() > k);
-		
-		return neighbors.subList(0, k);
+	public List<Similarity> nearestNeighbors(int k, int movieId) {
+		return null;
 	}
 	
 	/**
@@ -159,14 +138,14 @@ public class NaiveKNN implements Predictor {
 	public float predictRating(int movieId, int userId) {
 		assert(_indexFile != null);
 		int k = 5;
-		List<Neighbor> nearestNeighbors = nearestNeighbors(k, movieId);
+		List<Similarity> nearestNeighbors = nearestNeighbors(k, movieId);
 		float sum = 0;
 		
 		//System.out.println("Nearest neighbors for " + movieId + ":" );
 		
 			
-		for(Neighbor neighbor: nearestNeighbors) {
-			float neighborAvg = averageRatingTable.get(neighbor.id);
+		for(Similarity neighbor: nearestNeighbors) {
+			float neighborAvg = averageRatingTable.get(neighbor.MovieID);
 			//System.out.println("\tdistance for neighbor " + neighbor.id + ": " + neighbor.distance);
 			sum += neighborAvg;
 		}
@@ -183,78 +162,23 @@ public class NaiveKNN implements Predictor {
 		return averageRating;
 	}
 	
-	private static class Pair {
-		public final int a, b;
-		public Pair(int A, int B) {
-			this.a = A;
-			this.b = B;
+	protected class Similarity implements Comparable<Similarity >{
+		public int MovieID;
+		public float Distance;
+		
+		public Similarity(int MovieID, float Distance) {
+			this.MovieID = MovieID;
+			this.Distance = Distance;
 		}
 		
-		public boolean equals(Object o) {
-			if(!(o instanceof Pair)) {
-				return false;
-			}
-			
-			return a == ((Pair)o).a && b == ((Pair)o).b;
-			
-		}
-		
-		public String toString() {
-			return "(" + a + ", " + b + ")";
-		}
-	}
-	
-	protected static class DistanceTable {
-		
-		private Hashtable<String, Float> table = new Hashtable<String, Float>();
-		private final Set<Integer> movieIds = new HashSet<Integer>();
-		
-		public void put(int a, int b, float distance) {
-			if(a > b) {
-				table.put(new Pair(b, a).toString(), distance);
-			} else {
-				table.put(new Pair(a, b).toString(), distance);
-			}
-			
-			movieIds.add(a);
-			movieIds.add(b);
-		}
-		
-		public Set<Integer> getMovieIds() {
-			return movieIds;
-		}
-		
-		public float get(int a, int b) {
-			int A = Math.min(a, b);
-			int B = Math.max(a, b);
-			
-			Float distance = table.get(new Pair(A, B).toString());
-			if(distance == null) {
-				return Float.MAX_VALUE;
-			} else {
-				return distance;
-			}
+		public int compareTo(Similarity s) {
+			if(Distance < s.Distance)
+				return -1;
+			return 1;
 		}
 		
 		public String toString() {
-			StringBuilder sb = new StringBuilder();
-			sb.append("Distance table:\n");
-			
-			for(Entry<String, Float> entry: table.entrySet()) {
-				sb.append(entry.getKey());
-				sb.append(" distance: ");
-				sb.append(entry.getValue());
-				sb.append("\n");
-			}
-			/*
-			for(int i=1; i <= LIMIT; i++) {
-				for(int j=i+1; j <= LIMIT; j++) {
-					sb.append("(" + i + "," + j + ")");
-					sb.append(" distance: " + this.get(i, j) + "\n");
-				}
-			}
-			*/
-			return sb.toString();
+			return MovieID + "/" + Distance;
 		}
 	}
 	

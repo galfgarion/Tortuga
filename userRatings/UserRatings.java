@@ -14,11 +14,11 @@ import neustore.base.LRUBuffer;
 
 import database.RatingStore;
 
-
-public class UserRatings implements Iterable<MovieRating>, Comparable<UserRatings> {
+public class UserRatings implements Iterable<MovieRating>{
 	
-	private int _userID;
-	public final ArrayList<MovieRating> _movieRatings = new ArrayList<MovieRating>();
+	private int _movieID;
+	protected final ArrayList<MovieRating> _userRatings = new ArrayList<MovieRating>();
+	protected final ArrayList<EfficientUserRatings> _userRatingsReadback = new ArrayList<EfficientUserRatings>();
 	public static Pattern ratingPattern = Pattern.compile("(\\d+),(\\d),(\\d{4}-\\d{2}-\\d{2})");
 	public static Pattern idPattern = Pattern.compile("^\\s*(\\d+):\\s*$");
 	
@@ -32,8 +32,8 @@ public class UserRatings implements Iterable<MovieRating>, Comparable<UserRating
 	 * Should only be used for testing
 	 * @param movieID
 	 */
-	public UserRatings(int movieID) {
-		_userID = movieID;
+	UserRatings(int movieID) {
+		_movieID = movieID;
 	}
 	
 	/**
@@ -42,19 +42,19 @@ public class UserRatings implements Iterable<MovieRating>, Comparable<UserRating
 	 * @param movieId
 	 * @param ratingsIndex
 	 */
-	public UserRatings(int userID, File indexFile) {
+	public UserRatings(int movieID, File indexFile) {
 		try {
 			UserID_Ratings ratingsIndex = new UserID_Ratings(new LRUBuffer(5, 4096), indexFile.getAbsolutePath(), 0);
-			_userID = userID;
-			_movieRatings.addAll(ratingsIndex.getRatingsById(userID));
+			_movieID = movieID;
+			_userRatingsReadback.add(ratingsIndex.getRatingsById(movieID));
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
 		}
 	}
 	
 	public UserRatings(int movieID, UserID_Ratings ratingsIndex) {
-		_userID = movieID;
-		_movieRatings.addAll(ratingsIndex.getRatingsById(movieID));
+		_movieID = movieID;
+		_userRatingsReadback.add(ratingsIndex.getRatingsById(movieID));
 	}
 	
 	public UserRatings(File ratingsFile) {
@@ -66,12 +66,12 @@ public class UserRatings implements Iterable<MovieRating>, Comparable<UserRating
 	}
 	
 	public float averageRating() {
-		if(_movieRatings.isEmpty()) {
+		if(_userRatings.isEmpty()) {
 			return 0.0f;
 		}
-		int size = _movieRatings.size();
+		int size = _userRatings.size();
 		int sum = 0;
-		for(MovieRating rating: _movieRatings) {
+		for(MovieRating rating: _userRatings) {
 			sum += rating.rating;
 		}
 		
@@ -85,8 +85,7 @@ public class UserRatings implements Iterable<MovieRating>, Comparable<UserRating
 			
 			
 			scanner.useDelimiter(":");
-			_userID = scanner.nextInt();
-			
+			_movieID = scanner.nextInt();
 			
 			while(scanner.hasNextLine()) {
 				String line = scanner.nextLine();
@@ -94,9 +93,9 @@ public class UserRatings implements Iterable<MovieRating>, Comparable<UserRating
 				if(matcher.find()) {
 					int userId = Integer.parseInt(matcher.group(1));
 					byte rating = (byte)Integer.parseInt(matcher.group(2));
-					String date = matcher.group(3);
+					// String date = matcher.group(3);
 					
-					_movieRatings.add(new MovieRating(userId, rating /*, date*/));
+					_userRatings.add(new MovieRating(userId, rating /*, date*/));
 				} else {
 					// TODO: log a warning or throw an exception
 				}
@@ -112,8 +111,8 @@ public class UserRatings implements Iterable<MovieRating>, Comparable<UserRating
 	
 	public void writeToFile(File file) throws Exception{
 		PrintStream out = new PrintStream(file);
-		out.println(_userID + ":");
-		for(MovieRating rating: _movieRatings) {
+		out.println(_movieID + ":");
+		for(MovieRating rating: _userRatings) {
 			out.println(rating);
 		}
 		
@@ -142,27 +141,27 @@ public class UserRatings implements Iterable<MovieRating>, Comparable<UserRating
 	}
 	
 	public int getMovieID() {
-		return _userID;
+		return _movieID;
 	}
 	
 	public int size() {
-		return _movieRatings.size();
+		return _userRatings.size();
 	}
 	public void add(MovieRating rating) {
 		// TODO Auto-generated method stub
-		_movieRatings.add(rating);
+		_userRatings.add(rating);
 	}
 	
 	public ArrayList<MovieRating> getUserRatings() {
 		// TODO Auto-generated method stub
-		return _movieRatings;
+		return _userRatings;
 	}
 	
 	// return the user rating for user
 	// precondition: the rating exists in the list of user ratings
 	public MovieRating getRatingByUser(int userId) {
-		for(MovieRating rating : _movieRatings) {
-			if(rating.movieId == userId) {
+		for(MovieRating rating : _userRatings) {
+			if(rating.userId == userId) {
 				return rating;
 			}
 		}
@@ -173,29 +172,20 @@ public class UserRatings implements Iterable<MovieRating>, Comparable<UserRating
 	@Override
 	public Iterator<MovieRating> iterator() {
 		// TODO Auto-generated method stub
-		return _movieRatings.iterator();
+		return _userRatings.iterator();
 	}
 	
 	public boolean remove(Object o) {
-		return _movieRatings.remove(o);
+		return _userRatings.remove(o);
 	}
 	
 	public boolean isEmpty() {
-		return _movieRatings.isEmpty();
+		return _userRatings.isEmpty();
 	}
 	
 	public MovieRating removeFirst() {
-		MovieRating item = _movieRatings.get(0);
-		_movieRatings.remove(0);
+		MovieRating item = _userRatings.get(0);
+		_userRatings.remove(0);
 		return item;
-	}
-
-	public int compareTo(UserRatings o) {
-		return this._userID - o._userID;
-	}
-	
-	public boolean equals(Object o) {
-		UserRatings c = (UserRatings)o;
-		return c._userID == this._userID;
 	}
 }
