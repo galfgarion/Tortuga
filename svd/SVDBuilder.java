@@ -14,8 +14,8 @@ import cern.colt.matrix.linalg.*;
 public class SVDBuilder {
 
 	/*
-	 * rows = movieID
-	 * cols = userID
+	 * rows = userID
+	 * cols = movieID
 	 * 
 	 * matrix=> rows X cols = m X n = movieID X userID
 	 */
@@ -31,10 +31,10 @@ public class SVDBuilder {
 		MovieID_Ratings theRatings = new MovieID_Ratings(new LRUBuffer(5, 4096), index.getAbsolutePath(), 0);
 		EfficientMovieRatings ratings;
 		
-		for(int row=0; row<rows; ++row) {
-			ratings = theRatings.getRatingsById(row+1);
+		for(int col=0; col<cols; ++col) {
+			ratings = theRatings.getRatingsById(col+1);
 			for(int x = 0; x < ratings.numRatingsStored; x++) {
-				svdbuild.setQuick(row, ratings.UserID[x], ratings.Rating[x]);
+				svdbuild.setQuick(ratings.UserID[x], col, ratings.Rating[x]);
 			}
 		}
 		
